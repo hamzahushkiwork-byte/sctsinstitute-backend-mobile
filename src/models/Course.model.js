@@ -1,0 +1,57 @@
+import mongoose from 'mongoose';
+
+const courseSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    cardBody: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    description: {
+      type: String,
+      default: '',
+    },
+    imageUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    sortOrder: {
+      type: Number,
+      default: 0,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+    strict: true,
+    strictQuery: true,
+  }
+);
+
+// Force delete existing model to ensure fresh schema
+if (mongoose.models.Course) {
+  delete mongoose.models.Course;
+}
+if (mongoose.modelSchemas && mongoose.modelSchemas.Course) {
+  delete mongoose.modelSchemas.Course;
+}
+
+const Course = mongoose.model('Course', courseSchema);
+
+export default Course;
