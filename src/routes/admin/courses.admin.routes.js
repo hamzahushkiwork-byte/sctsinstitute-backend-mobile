@@ -19,4 +19,7 @@ router.put('/courses/:id', uploadCourseImage, coursesController.updateCourse);
 // DELETE /api/v1/admin/courses/:id - Delete course
 router.delete('/courses/:id', coursesController.deleteCourse);
 
+// PATCH /api/v1/admin/courses/:id/toggle-availability - Toggle availability
+router.patch('/courses/:id/toggle-availability', coursesController.toggleCourseAvailability);
+
 export default router;

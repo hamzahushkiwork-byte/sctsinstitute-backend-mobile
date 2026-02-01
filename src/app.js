@@ -42,10 +42,12 @@ app.use(express.urlencoded({ extended: true }));
 /**
  * CORS (API)
  */
+const corsOrigin = (process.env.CORS_ORIGIN || "http://localhost:5173").replace(/\/$/, "");
+
 app.use(
   cors({
-    origin: config.corsOrigin || "http://localhost:5173",
-    credentials: false,
+    origin: corsOrigin,
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -82,11 +84,11 @@ app.use(
     res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Range");
     res.setHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges");
-    
+
     // Cross-Origin Resource Policy headers
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-    
+
     // Support Range requests for video streaming (206 Partial Content)
     res.setHeader("Accept-Ranges", "bytes");
 
@@ -101,7 +103,7 @@ app.use(
       res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
       res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
       res.setHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges");
-      
+
       // Caching
       res.setHeader("Cache-Control", "public, max-age=3600");
     },

@@ -16,10 +16,20 @@ const __dirname = dirname(__filename);
  */
 export async function listCourses(req, res) {
   try {
-    const courses = await Course.find()
+    const { availability } = req.query;
+    let query = {};
+
+    if (availability === 'available') {
+      query.isAvailable = true;
+    } else if (availability === 'unavailable') {
+      query.isAvailable = false;
+    }
+
+    // Admin still sees everything by default unless filtered
+    const courses = await Course.find(query)
       .sort({ sortOrder: 1, createdAt: -1 })
       .lean();
-    
+
     return ok(res, courses);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch courses');
@@ -33,11 +43,11 @@ export async function getCourseById(req, res) {
   try {
     const { id } = req.params;
     const course = await Course.findById(id).lean();
-    
+
     if (!course) {
       return fail(res, 404, 'Course not found');
     }
-    
+
     return ok(res, course);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch course');
@@ -55,7 +65,7 @@ export async function createCourse(req, res) {
     console.log('[createCourse] Content-Type:', req.headers['content-type']);
     console.log('[createCourse] req.body:', req.body);
     console.log('[createCourse] req.file:', req.file);
-    
+
     // Extract fields from FormData
     const title = String(req.body.title || '').trim();
     const slug = String(req.body.slug || '').trim();
@@ -63,18 +73,19 @@ export async function createCourse(req, res) {
     const description = String(req.body.description || '').trim();
     const sortOrder = Number(req.body.sortOrder ?? 0);
     const isActive = req.body.isActive === 'true' || req.body.isActive === true || req.body.isActive === undefined;
-    
+    const isAvailable = req.body.isAvailable === 'true' || req.body.isAvailable === true || req.body.isAvailable === undefined;
+
     // Validate required fields
     if (!title) {
       return fail(res, 400, 'title is required');
     }
-    
+
     // Handle file upload (using req.file from multer.single())
     const imageFile = req.file;
-    
+
     // Build imageUrl from uploaded file (if present)
     const imageUrl = imageFile ? `/uploads/${imageFile.filename}` : '';
-    
+
     // Generate slug if not provided
     let finalSlug = slug;
     if (!finalSlug) {
@@ -82,7 +93,7 @@ export async function createCourse(req, res) {
       if (!baseSlug) {
         return fail(res, 400, 'Unable to generate slug from title');
       }
-      
+
       // Check if slug exists and generate unique one
       const checkSlugExists = async (slugToCheck, excludeId) => {
         const query = { slug: slugToCheck };
@@ -92,7 +103,7 @@ export async function createCourse(req, res) {
         const existing = await Course.findOne(query);
         return !!existing;
       };
-      
+
       finalSlug = await generateUniqueSlug(baseSlug, checkSlugExists);
     } else {
       // Validate provided slug is unique
@@ -102,7 +113,7 @@ export async function createCourse(req, res) {
       }
       finalSlug = finalSlug.toLowerCase();
     }
-    
+
     // Create course - include all fields (empty strings are fine per schema defaults)
     const courseData = {
       title,
@@ -111,32 +122,33 @@ export async function createCourse(req, res) {
       description: description || '',
       sortOrder,
       isActive,
+      isAvailable,
     };
-    
+
     // Only add imageUrl if we have a file
     if (imageUrl) {
       courseData.imageUrl = imageUrl;
     }
-    
+
     console.log('[createCourse] Course data to create:', courseData);
-    
+
     const course = await Course.create(courseData);
-    
+
     return ok(res, course, 'Course created successfully', null, 201);
   } catch (error) {
     console.error('[createCourse] Error:', error);
-    
+
     // Handle Mongoose validation errors
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors || {}).map(err => err.message).join(', ');
       return fail(res, 400, `Course validation failed: ${validationErrors}`);
     }
-    
+
     // Handle duplicate slug error
     if (error.code === 11000 && error.keyPattern?.slug) {
       return fail(res, 400, 'A course with this slug already exists');
     }
-    
+
     return fail(res, 400, error.message || 'Failed to create course');
   }
 }
@@ -149,30 +161,33 @@ export async function createCourse(req, res) {
 export async function updateCourse(req, res) {
   try {
     const { id } = req.params;
-    
+
     // Find existing course
     const existingCourse = await Course.findById(id);
     if (!existingCourse) {
       return fail(res, 404, 'Course not found');
     }
-    
+
     // Extract fields from req.body
     const title = req.body.title?.trim();
     const slug = req.body.slug?.trim();
     const cardBody = req.body.cardBody?.trim();
     const description = req.body.description?.trim();
     const sortOrder = req.body.sortOrder !== undefined ? Number(req.body.sortOrder) : undefined;
-    const isActive = req.body.isActive !== undefined 
+    const isActive = req.body.isActive !== undefined
       ? (req.body.isActive === 'true' || req.body.isActive === true)
       : undefined;
-    
+    const isAvailable = req.body.isAvailable !== undefined
+      ? (req.body.isAvailable === 'true' || req.body.isAvailable === true)
+      : undefined;
+
     // Build update data
     const updateData = {};
-    
+
     if (title !== undefined) {
       updateData.title = title;
     }
-    
+
     if (slug !== undefined) {
       // Validate slug is unique (excluding current course)
       const existing = await Course.findOne({ slug: slug.toLowerCase(), _id: { $ne: id } });
@@ -192,28 +207,32 @@ export async function updateCourse(req, res) {
           const existing = await Course.findOne(query);
           return !!existing;
         };
-        
+
         const uniqueSlug = await generateUniqueSlug(baseSlug, checkSlugExists, id);
         updateData.slug = uniqueSlug;
       }
     }
-    
+
     if (cardBody !== undefined) {
       updateData.cardBody = cardBody || undefined;
     }
-    
+
     if (description !== undefined) {
       updateData.description = description || undefined;
     }
-    
+
     if (sortOrder !== undefined) {
       updateData.sortOrder = sortOrder;
     }
-    
+
     if (isActive !== undefined) {
       updateData.isActive = isActive;
     }
-    
+
+    if (isAvailable !== undefined) {
+      updateData.isAvailable = isAvailable;
+    }
+
     // Helper function to delete old file
     const deleteOldFile = async (oldUrl) => {
       if (!oldUrl) return;
@@ -221,10 +240,10 @@ export async function updateCourse(req, res) {
         const imagePath = oldUrl.startsWith('/uploads/')
           ? oldUrl.replace('/uploads/', '')
           : oldUrl;
-        
+
         const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
         const filePath = join(uploadDir, imagePath);
-        
+
         if (existsSync(filePath)) {
           await unlink(filePath);
         }
@@ -233,37 +252,37 @@ export async function updateCourse(req, res) {
         // Continue with update even if file deletion fails
       }
     };
-    
+
     // Handle file upload (using req.file from multer.single())
     const imageFile = req.file;
-    
+
     // If new image uploaded, replace imageUrl and delete old file
     if (imageFile) {
       await deleteOldFile(existingCourse.imageUrl);
       updateData.imageUrl = `/uploads/${imageFile.filename}`;
     }
-    
+
     // Update course
     const course = await Course.findByIdAndUpdate(
       id,
       updateData,
       { new: true, runValidators: true }
     );
-    
+
     return ok(res, course, 'Course updated successfully');
   } catch (error) {
     console.error('[updateCourse] Error:', error);
-    
+
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors || {}).map(err => err.message).join(', ');
       return fail(res, 400, `Course validation failed: ${validationErrors}`);
     }
-    
+
     // Handle duplicate slug error
     if (error.code === 11000 && error.keyPattern?.slug) {
       return fail(res, 400, 'A course with this slug already exists');
     }
-    
+
     return fail(res, 400, error.message || 'Failed to update course');
   }
 }
@@ -275,13 +294,13 @@ export async function updateCourse(req, res) {
 export async function deleteCourse(req, res) {
   try {
     const { id } = req.params;
-    
+
     // Find course before deletion to access imageUrl
     const course = await Course.findById(id);
     if (!course) {
       return fail(res, 404, 'Course not found');
     }
-    
+
     // Helper function to delete file
     const deleteFile = async (imageUrl) => {
       if (!imageUrl) return;
@@ -289,10 +308,10 @@ export async function deleteCourse(req, res) {
         const imagePath = imageUrl.startsWith('/uploads/')
           ? imageUrl.replace('/uploads/', '')
           : imageUrl;
-        
+
         const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
         const filePath = join(uploadDir, imagePath);
-        
+
         if (existsSync(filePath)) {
           await unlink(filePath);
         }
@@ -301,16 +320,38 @@ export async function deleteCourse(req, res) {
         // Continue with course deletion even if file deletion fails
       }
     };
-    
+
     // Delete image file
     await deleteFile(course.imageUrl);
-    
+
     // Delete course record
     await Course.findByIdAndDelete(id);
-    
+
     return ok(res, null, 'Course deleted successfully');
   } catch (error) {
     console.error('[deleteCourse] Error:', error);
     return fail(res, 500, error.message || 'Failed to delete course');
+  }
+}
+
+/**
+ * Toggle course availability status
+ */
+export async function toggleCourseAvailability(req, res) {
+  try {
+    const { id } = req.params;
+
+    const course = await Course.findById(id);
+    if (!course) {
+      return fail(res, 404, 'Course not found');
+    }
+
+    course.isAvailable = !course.isAvailable;
+    await course.save();
+
+    return ok(res, course, `Course availability set to ${course.isAvailable}`);
+  } catch (error) {
+    console.error('[toggleCourseAvailability] Error:', error);
+    return fail(res, 500, error.message || 'Failed to toggle availability');
   }
 }

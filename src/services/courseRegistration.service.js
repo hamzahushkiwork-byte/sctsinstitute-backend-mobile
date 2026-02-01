@@ -12,6 +12,11 @@ export async function registerForCourse(courseId, userId) {
     throw new Error('Course not found');
   }
 
+  // Check if course is available
+  if (course.isAvailable === false) {
+    throw new Error('This course is currently not available for registration');
+  }
+
   // Check if user exists
   const user = await User.findById(userId);
   if (!user) {
@@ -60,12 +65,12 @@ export async function getAllRegistrations() {
     })
     .sort({ createdAt: -1 })
     .lean();
-  
+
   // Manually fetch missing data if populate failed
   const registrationsWithData = await Promise.all(
     registrations.map(async (reg) => {
       const result = { ...reg };
-      
+
       // If courseId is not populated (null or ObjectId string), fetch it manually
       if (!result.courseId || typeof result.courseId !== 'object' || !result.courseId.title) {
         try {
@@ -81,7 +86,7 @@ export async function getAllRegistrations() {
           result.courseId = null;
         }
       }
-      
+
       // If userId is not populated (null or ObjectId string), fetch it manually
       if (!result.userId || typeof result.userId !== 'object' || !result.userId.email) {
         try {
@@ -97,11 +102,11 @@ export async function getAllRegistrations() {
           result.userId = null;
         }
       }
-      
+
       return result;
     })
   );
-  
+
   return registrationsWithData;
 }
 
