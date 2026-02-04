@@ -16,7 +16,7 @@ for (const key of required) {
 }
 
 export default {
-  port: parseInt(process.env.PORT || '5000', 10),
+  port: parseInt(process.env.PORT || '8080', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   uploadDir: process.env.UPLOAD_DIR || 'uploads',
@@ -39,5 +39,5 @@ export default {
 };
 
 export const MONGODB_URI = process.env.MONGODB_URI;
-export const PORT = parseInt(process.env.PORT || '5000', 10);
+export const PORT = parseInt(process.env.PORT || '8080', 10);
 

@@ -130,6 +130,13 @@ app.get("/__headers", (req, res) => {
 app.use("/api", routes);
 
 /**
+ * Health endpoint
+ */
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+/**
  * Root endpoint - health/status
  */
 app.get("/", (req, res) => {

@@ -21,12 +21,12 @@ dotenv.config({ path: envPath });
 
 
 if (process.env.NODE_ENV === "development") {
-console.log("ENV CHECK:", {
-hasMongo: !!process.env.MONGODB_URI,
-nodeEnv: process.env.NODE_ENV,
-corsOrigin: process.env.CORS_ORIGIN,
-envPath,
-});
+  console.log("ENV CHECK:", {
+    hasMongo: !!process.env.MONGODB_URI,
+    nodeEnv: process.env.NODE_ENV,
+    corsOrigin: process.env.CORS_ORIGIN,
+    envPath,
+  });
 }
 
 
@@ -39,23 +39,23 @@ const PORT = config.port;
 
 
 async function startServer() {
-try {
-await connectDB();
-} catch (error) {
-if (config.nodeEnv === "production") {
-console.error("❌ Failed to connect to database. Exiting.");
-process.exit(1);
-} else {
-console.warn("⚠️ Database connection failed, but starting server in dev mode.");
-}
-}
+  try {
+    await connectDB();
+  } catch (error) {
+    if (config.nodeEnv === "production") {
+      console.error("❌ Failed to connect to database. Exiting.");
+      process.exit(1);
+    } else {
+      console.warn("⚠️ Database connection failed, but starting server in dev mode.");
+    }
+  }
 
 
-app.listen(PORT, () => {
-console.log(`🚀 Server running on http://localhost:${PORT}`);
-console.log(`📡 Environment: ${config.nodeEnv}`);
-console.log(`🔗 API available at http://localhost:${PORT}/api/v1`);
-});
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📡 Environment: ${config.nodeEnv}`);
+    console.log(`🔗 Health check available at /`);
+  });
 }
 
 
