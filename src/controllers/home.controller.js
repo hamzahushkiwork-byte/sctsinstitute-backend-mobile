@@ -9,3 +9,4 @@ export async function getHeroSlides(req, res) {
     return fail(res, 500, error.message || 'Failed to fetch hero slides');
   }
 }
+console.log("tst");
