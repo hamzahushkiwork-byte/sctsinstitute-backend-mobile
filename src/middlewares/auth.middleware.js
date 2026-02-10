@@ -15,6 +15,7 @@ export default function authMiddleware(req, res, next) {
     try {
       const decoded = jwt.verify(token, config.jwt.accessSecret);
       req.user = decoded;
+      res.locals.accessToken = token; // Attach token so it can be sent in response
       next();
     } catch (error) {
       return fail(res, 401, 'Invalid or expired token');
