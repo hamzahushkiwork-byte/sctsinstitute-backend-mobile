@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const heroSlideSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ['image', 'video'],
+      enum: ["image", "video"],
       required: true,
     },
     title: {
@@ -31,13 +31,14 @@ const heroSlideSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    test: {
+      type: String,
+      default: "test",
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export default mongoose.model('HeroSlide', heroSlideSchema);
-
-
-
+export default mongoose.model("HeroSlide", heroSlideSchema);
