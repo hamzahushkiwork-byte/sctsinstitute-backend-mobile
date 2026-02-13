@@ -14,7 +14,7 @@ export function ok(
     data,
     message,
     errors,
-    test: "test ok",
+    test: "test success ok",
   };
   if (res.locals && res.locals.accessToken) {
     payload.accessToken = res.locals.accessToken;
