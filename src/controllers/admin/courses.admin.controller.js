@@ -7,9 +7,268 @@ import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import config from '../../config/env.js';
 import { slugify, generateUniqueSlug } from '../../utils/slug.js';
+import { toAbsoluteUrl } from '../../utils/url.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const BASE_URL = config.baseUrl || '';
+
+function absoluteUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  return toAbsoluteUrl(url.trim(), BASE_URL);
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for admin courses list. Keeps data as array.
+ */
+function buildAdminCoursesData(courses) {
+  if (!Array.isArray(courses)) return courses;
+
+  const SHORT_DESC_LENGTH = 160;
+
+  return courses.map((c) => {
+    if (!c || typeof c !== 'object') return c;
+
+    const id = c._id != null ? String(c._id) : c.id != null ? String(c.id) : null;
+    const hasId = !!id;
+    const baseUrl = hasId ? `/admin/courses/${id}` : null;
+    const toggleUrl = hasId ? `/admin/courses/${id}/toggle-availability` : null;
+
+    const out = { ...c };
+
+    const desc = c.description != null ? String(c.description).trim() : '';
+    const card = c.cardBody != null ? String(c.cardBody).trim() : '';
+    out.shortDescription =
+      desc.length > 0
+        ? desc.slice(0, SHORT_DESC_LENGTH)
+        : card.length > 0
+          ? card.slice(0, SHORT_DESC_LENGTH)
+          : null;
+
+    if (c.imageUrl != null && String(c.imageUrl).trim() !== '') {
+      out.media = {
+        url: absoluteUrl(c.imageUrl),
+        alt: c.title != null && String(c.title).trim() !== '' ? c.title : 'Course',
+      };
+    }
+
+    const isAvail = c.isAvailable === true;
+    out.availabilityStatus = isAvail ? 'available' : 'coming_soon';
+
+    out.canRegister = c.isActive === true && c.isAvailable === true;
+
+    out.adminUi = {
+      canEdit: true,
+      canDelete: true,
+      canToggleAvailability: true,
+    };
+
+    out.actions = [
+      { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+      { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+      { type: 'toggle_availability', label: 'Toggle Availability', url: toggleUrl, enabled: hasId },
+      { type: 'delete', label: 'Delete', url: baseUrl, enabled: hasId },
+    ];
+
+    return out;
+  });
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for single course (GET by id). Keeps data as object.
+ */
+function buildCourseByIdData(course) {
+  if (!course || typeof course !== 'object') return course;
+
+  const SHORT_DESC_LENGTH = 160;
+  const id = course._id != null ? String(course._id) : course.id != null ? String(course.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/courses/${id}` : null;
+  const toggleUrl = hasId ? `/admin/courses/${id}/toggle-availability` : null;
+
+  const out = { ...course };
+
+  const desc = course.description != null ? String(course.description).trim() : '';
+  const card = course.cardBody != null ? String(course.cardBody).trim() : '';
+  out.shortDescription =
+    desc.length > 0
+      ? desc.slice(0, SHORT_DESC_LENGTH)
+      : card.length > 0
+        ? card.slice(0, SHORT_DESC_LENGTH)
+        : null;
+
+  if (course.imageUrl != null && String(course.imageUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(course.imageUrl),
+      alt: course.title != null && String(course.title).trim() !== '' ? course.title : 'Course',
+    };
+  }
+
+  out.availabilityStatus = course.isAvailable === true ? 'available' : 'coming_soon';
+  out.canRegister = course.isActive === true && course.isAvailable === true;
+
+  out.content = {
+    summary: card || out.shortDescription || null,
+    sections: [
+      { key: 'description', title: 'Description', body: course.description ?? null },
+    ],
+  };
+
+  out.adminUi = {
+    canEdit: true,
+    canDelete: true,
+    canToggleAvailability: true,
+  };
+
+  out.actions = [
+    { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+    { type: 'toggle_availability', label: 'Toggle Availability', url: toggleUrl, enabled: hasId },
+    { type: 'delete', label: 'Delete', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/courses', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for created course response (POST). Keeps data as object.
+ */
+function buildCreateCourseData(course) {
+  if (!course || typeof course !== 'object') return course;
+
+  const plain =
+    typeof course.toObject === 'function' ? course.toObject() : { ...course };
+  const SHORT_DESC_LENGTH = 160;
+  const id = plain._id != null ? String(plain._id) : plain.id != null ? String(plain.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/courses/${id}` : null;
+  const toggleUrl = hasId ? `/admin/courses/${id}/toggle-availability` : null;
+
+  const out = { ...plain };
+
+  const desc = plain.description != null ? String(plain.description).trim() : '';
+  const card = plain.cardBody != null ? String(plain.cardBody).trim() : '';
+  out.shortDescription =
+    desc.length > 0
+      ? desc.slice(0, SHORT_DESC_LENGTH)
+      : card.length > 0
+        ? card.slice(0, SHORT_DESC_LENGTH)
+        : null;
+
+  if (plain.imageUrl != null && String(plain.imageUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(plain.imageUrl),
+      alt: plain.title != null && String(plain.title).trim() !== '' ? plain.title : 'Course',
+    };
+  }
+
+  out.availabilityStatus = plain.isAvailable === true ? 'available' : 'coming_soon';
+  out.canRegister = plain.isActive === true && plain.isAvailable === true;
+
+  out.adminUi = {
+    canEdit: true,
+    canDelete: true,
+    canToggleAvailability: true,
+  };
+
+  out.actions = [
+    { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+    { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+    { type: 'toggle_availability', label: 'Toggle Availability', url: toggleUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/courses', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for updated course response (PUT). Keeps data as object.
+ */
+function buildUpdateCourseData(course) {
+  if (!course || typeof course !== 'object') return course;
+
+  const plain =
+    typeof course.toObject === 'function' ? course.toObject() : { ...course };
+  const SHORT_DESC_LENGTH = 160;
+  const id = plain._id != null ? String(plain._id) : plain.id != null ? String(plain.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/courses/${id}` : null;
+
+  const out = { ...plain };
+
+  const desc = plain.description != null ? String(plain.description).trim() : '';
+  const card = plain.cardBody != null ? String(plain.cardBody).trim() : '';
+  out.shortDescription =
+    desc.length > 0
+      ? desc.slice(0, SHORT_DESC_LENGTH)
+      : card.length > 0
+        ? card.slice(0, SHORT_DESC_LENGTH)
+        : null;
+
+  if (plain.imageUrl != null && String(plain.imageUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(plain.imageUrl),
+      alt: plain.title != null && String(plain.title).trim() !== '' ? plain.title : 'Course',
+    };
+  }
+
+  out.availabilityStatus = plain.isAvailable === true ? 'available' : 'coming_soon';
+  out.canRegister = plain.isActive === true && plain.isAvailable === true;
+
+  out.adminUi = {
+    canEdit: true,
+    canDelete: true,
+    canToggleAvailability: true,
+  };
+
+  out.actions = [
+    { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/courses', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for toggle-availability response (PATCH). Keeps data as object.
+ */
+function buildToggleCourseAvailabilityData(course) {
+  if (!course || typeof course !== 'object') return course;
+
+  const plain =
+    typeof course.toObject === 'function' ? course.toObject() : { ...course };
+  const id = plain._id != null ? String(plain._id) : plain.id != null ? String(plain.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/courses/${id}` : null;
+
+  const toggledAt =
+    plain.updatedAt != null
+      ? plain.updatedAt instanceof Date
+        ? plain.updatedAt.toISOString()
+        : plain.updatedAt
+      : new Date().toISOString();
+
+  const isAvailableVal = plain.isAvailable !== undefined ? plain.isAvailable : null;
+  const availabilityLabel =
+    isAvailableVal === true ? 'Available' : isAvailableVal === false ? 'Unavailable' : 'Unknown';
+
+  const toggleMeta = {
+    toggledAt,
+    availabilityLabel,
+    isAvailable: isAvailableVal,
+  };
+
+  const availabilityStatus = plain.isAvailable === true ? 'available' : 'coming_soon';
+  const canRegister = plain.isActive === true && plain.isAvailable === true;
+
+  const actions = [
+    { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/courses', enabled: true },
+  ];
+
+  return { ...plain, toggleMeta, availabilityStatus, canRegister, actions };
+}
 
 /**
  * List all courses (admin)
@@ -30,7 +289,8 @@ export async function listCourses(req, res) {
       .sort({ sortOrder: 1, createdAt: -1 })
       .lean();
 
-    return ok(res, courses);
+    const data = buildAdminCoursesData(courses);
+    return ok(res, data);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch courses');
   }
@@ -48,7 +308,8 @@ export async function getCourseById(req, res) {
       return fail(res, 404, 'Course not found');
     }
 
-    return ok(res, course);
+    const data = buildCourseByIdData(course);
+    return ok(res, data);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch course');
   }
@@ -134,7 +395,8 @@ export async function createCourse(req, res) {
 
     const course = await Course.create(courseData);
 
-    return ok(res, course, 'Course created successfully', null, 201);
+    const data = buildCreateCourseData(course);
+    return ok(res, data, 'Course created successfully', null, 201);
   } catch (error) {
     console.error('[createCourse] Error:', error);
 
@@ -269,7 +531,8 @@ export async function updateCourse(req, res) {
       { new: true, runValidators: true }
     );
 
-    return ok(res, course, 'Course updated successfully');
+    const data = buildUpdateCourseData(course);
+    return ok(res, data, 'Course updated successfully');
   } catch (error) {
     console.error('[updateCourse] Error:', error);
 
@@ -349,7 +612,8 @@ export async function toggleCourseAvailability(req, res) {
     course.isAvailable = !course.isAvailable;
     await course.save();
 
-    return ok(res, course, `Course availability set to ${course.isAvailable}`);
+    const data = buildToggleCourseAvailabilityData(course);
+    return ok(res, data, `Course availability set to ${course.isAvailable}`);
   } catch (error) {
     console.error('[toggleCourseAvailability] Error:', error);
     return fail(res, 500, error.message || 'Failed to toggle availability');

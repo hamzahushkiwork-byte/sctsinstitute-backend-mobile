@@ -1,6 +1,12 @@
 import jwt from 'jsonwebtoken';
 import config from '../config/env.js';
 
+/** Access token expiry: 15m in seconds (for API responses). */
+export const ACCESS_TOKEN_EXPIRES_IN_SECONDS = 15 * 60;
+
+/** Refresh token expiry: 7d in seconds (for API responses). */
+export const REFRESH_TOKEN_EXPIRES_IN_SECONDS = 7 * 24 * 60 * 60;
+
 /**
  * Sign access token
  * @param {Object} payload - Token payload

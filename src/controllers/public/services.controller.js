@@ -52,6 +52,17 @@ function buildServiceActions(slug) {
 }
 
 /**
+ * Build content object for single service (mobile-friendly structured content).
+ * Additive only; does not replace description.
+ */
+function buildServiceContent(description) {
+  const sections = [
+    { key: 'description', title: 'Description', body: (description != null && String(description)) || null },
+  ];
+  return { sections };
+}
+
+/**
  * Get active services (public)
  * Returns only services where isActive=true, sorted by sortOrder asc, createdAt desc.
  * Keeps all existing fields; adds optional mobile-friendly fields (shortDescription, media, innerMedia, ui, actions).
@@ -84,26 +95,38 @@ export async function getActiveServices(req, res) {
 
 /**
  * Get a single active service by slug (public)
- * Returns service only if isActive=true
+ * Returns service only if isActive=true.
+ * Keeps all existing fields; adds optional mobile-friendly fields (shortDescription, media, innerMedia, content, actions).
  */
 export async function getServiceBySlug(req, res) {
   try {
     const { slug } = req.params;
-    
+
     if (!slug) {
       return fail(res, 400, 'Slug is required');
     }
-    
-    const service = await Service.findOne({ 
+
+    const service = await Service.findOne({
       slug: slug.toLowerCase().trim(),
-      isActive: true 
+      isActive: true,
     }).lean();
-    
+
     if (!service) {
       return fail(res, 404, 'Service not found');
     }
-    
-    return ok(res, service);
+
+    const out = { ...service };
+    out.shortDescription = buildShortDescription(service.description);
+    if (service.imageUrl && String(service.imageUrl).trim()) {
+      out.media = buildServiceMedia(service.imageUrl, service.title);
+    }
+    if (service.innerImageUrl && String(service.innerImageUrl).trim()) {
+      out.innerMedia = buildServiceMedia(service.innerImageUrl, service.title);
+    }
+    out.content = buildServiceContent(service.description);
+    out.actions = buildServiceActions(service.slug);
+
+    return ok(res, out);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch service');
   }

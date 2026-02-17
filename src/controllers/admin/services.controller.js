@@ -7,9 +7,254 @@ import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import config from '../../config/env.js';
 import { slugify, generateUniqueSlug } from '../../utils/slug.js';
+import { toAbsoluteUrl } from '../../utils/url.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const BASE_URL = config.baseUrl || '';
+
+function absoluteUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  return toAbsoluteUrl(url.trim(), BASE_URL);
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for admin services list. Keeps data as array.
+ */
+function buildAdminServicesData(services) {
+  if (!Array.isArray(services)) return services;
+
+  const SHORT_DESC_LENGTH = 160;
+
+  return services.map((s) => {
+    if (!s || typeof s !== 'object') return s;
+
+    const id = s._id != null ? String(s._id) : s.id != null ? String(s.id) : null;
+    const hasId = !!id;
+    const baseUrl = hasId ? `/admin/services/${id}` : null;
+    const toggleUrl = hasId ? `/admin/services/${id}/active` : null;
+
+    const out = { ...s };
+
+    const desc = s.description != null ? String(s.description).trim() : '';
+    out.shortDescription = desc.length > 0 ? desc.slice(0, SHORT_DESC_LENGTH) : null;
+
+    if (s.imageUrl != null && String(s.imageUrl).trim() !== '') {
+      out.media = {
+        url: absoluteUrl(s.imageUrl),
+        alt: s.title != null && String(s.title).trim() !== '' ? s.title : 'Service',
+      };
+    }
+
+    if (s.innerImageUrl != null && String(s.innerImageUrl).trim() !== '') {
+      out.innerMedia = {
+        url: absoluteUrl(s.innerImageUrl),
+        alt: s.title != null && String(s.title).trim() !== '' ? s.title : 'Service',
+      };
+    }
+
+    out.adminUi = {
+      canEdit: true,
+      canDelete: true,
+      canToggleActive: true,
+    };
+
+    out.actions = [
+      { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+      { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+      { type: 'toggle_active', label: 'Toggle Active', url: toggleUrl, enabled: hasId },
+      { type: 'delete', label: 'Delete', url: baseUrl, enabled: hasId },
+    ];
+
+    return out;
+  });
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for single service (GET by id). Keeps data as object.
+ */
+function buildServiceByIdData(service) {
+  if (!service || typeof service !== 'object') return service;
+
+  const id = service._id != null ? String(service._id) : service.id != null ? String(service.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/services/${id}` : null;
+  const toggleUrl = hasId ? `/admin/services/${id}/active` : null;
+
+  const out = { ...service };
+
+  const SHORT_DESC_LENGTH = 160;
+  const desc = service.description != null ? String(service.description).trim() : '';
+  out.shortDescription = desc.length > 0 ? desc.slice(0, SHORT_DESC_LENGTH) : null;
+
+  if (service.imageUrl != null && String(service.imageUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(service.imageUrl),
+      alt: service.title != null && String(service.title).trim() !== '' ? service.title : 'Service',
+    };
+  }
+
+  if (service.innerImageUrl != null && String(service.innerImageUrl).trim() !== '') {
+    out.innerMedia = {
+      url: absoluteUrl(service.innerImageUrl),
+      alt: service.title != null && String(service.title).trim() !== '' ? service.title : 'Service',
+    };
+  }
+
+  out.content = {
+    sections: [
+      { key: 'description', title: 'Description', body: service.description ?? null },
+    ],
+  };
+
+  out.adminUi = {
+    canEdit: true,
+    canDelete: true,
+    canToggleActive: true,
+  };
+
+  out.actions = [
+    { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+    { type: 'toggle_active', label: 'Toggle Active', url: toggleUrl, enabled: hasId },
+    { type: 'delete', label: 'Delete', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/services', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for created service response (POST). Keeps data as object.
+ */
+function buildCreateServiceData(service) {
+  if (!service || typeof service !== 'object') return service;
+
+  const plain =
+    typeof service.toObject === 'function' ? service.toObject() : { ...service };
+  const id = plain._id != null ? String(plain._id) : plain.id != null ? String(plain.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/services/${id}` : null;
+  const toggleUrl = hasId ? `/admin/services/${id}/active` : null;
+
+  const out = { ...plain };
+
+  const SHORT_DESC_LENGTH = 160;
+  const desc = plain.description != null ? String(plain.description).trim() : '';
+  out.shortDescription = desc.length > 0 ? desc.slice(0, SHORT_DESC_LENGTH) : null;
+
+  if (plain.imageUrl != null && String(plain.imageUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(plain.imageUrl),
+      alt: plain.title != null && String(plain.title).trim() !== '' ? plain.title : 'Service',
+    };
+  }
+
+  if (plain.innerImageUrl != null && String(plain.innerImageUrl).trim() !== '') {
+    out.innerMedia = {
+      url: absoluteUrl(plain.innerImageUrl),
+      alt: plain.title != null && String(plain.title).trim() !== '' ? plain.title : 'Service',
+    };
+  }
+
+  out.adminUi = {
+    canEdit: true,
+    canDelete: true,
+    canToggleActive: true,
+  };
+
+  out.actions = [
+    { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+    { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+    { type: 'toggle_active', label: 'Toggle Active', url: toggleUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/services', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for updated service response (PUT). Keeps data as object.
+ */
+function buildUpdateServiceData(service) {
+  if (!service || typeof service !== 'object') return service;
+
+  const plain =
+    typeof service.toObject === 'function' ? service.toObject() : { ...service };
+  const id = plain._id != null ? String(plain._id) : plain.id != null ? String(plain.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/services/${id}` : null;
+
+  const out = { ...plain };
+
+  const SHORT_DESC_LENGTH = 160;
+  const desc = plain.description != null ? String(plain.description).trim() : '';
+  out.shortDescription = desc.length > 0 ? desc.slice(0, SHORT_DESC_LENGTH) : null;
+
+  if (plain.imageUrl != null && String(plain.imageUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(plain.imageUrl),
+      alt: plain.title != null && String(plain.title).trim() !== '' ? plain.title : 'Service',
+    };
+  }
+
+  if (plain.innerImageUrl != null && String(plain.innerImageUrl).trim() !== '') {
+    out.innerMedia = {
+      url: absoluteUrl(plain.innerImageUrl),
+      alt: plain.title != null && String(plain.title).trim() !== '' ? plain.title : 'Service',
+    };
+  }
+
+  out.adminUi = {
+    canEdit: true,
+    canDelete: true,
+    canToggleActive: true,
+  };
+
+  out.actions = [
+    { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/services', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for toggle-active response (PATCH). Keeps data as object.
+ */
+function buildToggleServiceActiveData(service) {
+  if (!service || typeof service !== 'object') return service;
+
+  const plain =
+    typeof service.toObject === 'function' ? service.toObject() : { ...service };
+  const id = plain._id != null ? String(plain._id) : plain.id != null ? String(plain.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/services/${id}` : null;
+
+  const toggledAt =
+    plain.updatedAt != null
+      ? plain.updatedAt instanceof Date
+        ? plain.updatedAt.toISOString()
+        : plain.updatedAt
+      : new Date().toISOString();
+
+  const isActiveVal = plain.isActive !== undefined ? plain.isActive : null;
+  const activeLabel =
+    isActiveVal === true ? 'Active' : isActiveVal === false ? 'Inactive' : 'Unknown';
+
+  const toggleMeta = {
+    toggledAt,
+    activeLabel,
+    isActive: isActiveVal,
+  };
+
+  const actions = [
+    { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/services', enabled: true },
+  ];
+
+  return { ...plain, toggleMeta, actions };
+}
 
 /**
  * List all services (admin)
@@ -20,7 +265,8 @@ export async function listServices(req, res) {
       .sort({ sortOrder: 1, createdAt: -1 })
       .lean();
     
-    return ok(res, services);
+    const data = buildAdminServicesData(services);
+    return ok(res, data);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch services');
   }
@@ -38,7 +284,8 @@ export async function getServiceById(req, res) {
       return fail(res, 404, 'Service not found');
     }
     
-    return ok(res, service);
+    const data = buildServiceByIdData(service);
+    return ok(res, data);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch service');
   }
@@ -110,8 +357,9 @@ export async function createService(req, res) {
       sortOrder,
       isActive,
     });
-    
-    return ok(res, service, 'Service created successfully', null, 201);
+
+    const data = buildCreateServiceData(service);
+    return ok(res, data, 'Service created successfully', null, 201);
   } catch (error) {
     console.error('[createService] Error:', error);
     
@@ -230,8 +478,9 @@ export async function updateService(req, res) {
       updateData,
       { new: true, runValidators: true }
     );
-    
-    return ok(res, service, 'Service updated successfully');
+
+    const data = buildUpdateServiceData(service);
+    return ok(res, data, 'Service updated successfully');
   } catch (error) {
     console.error('[updateService] Error:', error);
     
@@ -314,8 +563,9 @@ export async function toggleServiceActive(req, res) {
     if (!service) {
       return fail(res, 404, 'Service not found');
     }
-    
-    return ok(res, service, 'Service status updated successfully');
+
+    const data = buildToggleServiceActiveData(service);
+    return ok(res, data, 'Service status updated successfully');
   } catch (error) {
     console.error('[toggleServiceActive] Error:', error);
     return fail(res, 400, error.message || 'Failed to update service status');

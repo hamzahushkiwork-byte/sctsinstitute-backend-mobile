@@ -8,15 +8,237 @@ import { dirname, join } from 'path';
 import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import config from '../config/env.js';
+import { toAbsoluteUrl } from '../utils/url.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const BASE_URL = config.baseUrl || '';
+
+function absoluteUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  return toAbsoluteUrl(url.trim(), BASE_URL);
+}
+
+function mediaKind(mediaUrl) {
+  if (!mediaUrl || typeof mediaUrl !== 'string') return 'unknown';
+  const lower = mediaUrl.toLowerCase().trim();
+  if (/\.(mp4|mov|webm)(\?|$)/i.test(lower)) return 'video';
+  if (/\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(lower)) return 'image';
+  return 'unknown';
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for hero slides list. Keeps data as array.
+ */
+function buildHeroSlidesData(slides) {
+  if (!Array.isArray(slides)) return slides;
+
+  return slides.map((s) => {
+    if (!s || typeof s !== 'object') return s;
+
+    const id = s._id != null ? String(s._id) : s.id != null ? String(s.id) : null;
+    const hasId = !!id;
+    const baseUrl = hasId ? `/admin/hero-slides/${id}` : null;
+
+    const out = { ...s };
+
+    if (s.mediaUrl != null && String(s.mediaUrl).trim() !== '') {
+      out.media = {
+        url: absoluteUrl(s.mediaUrl),
+        kind: mediaKind(s.mediaUrl),
+        alt: s.title != null && String(s.title).trim() !== '' ? s.title : 'Hero slide',
+      };
+    }
+
+    const buttonLink = s.buttonLink != null ? String(s.buttonLink).trim() : null;
+    const linkType =
+      !buttonLink || buttonLink === ''
+        ? 'none'
+        : /^https?:\/\//i.test(buttonLink)
+          ? 'external'
+          : 'internal';
+    out.cta = {
+      text: s.buttonText != null ? s.buttonText : null,
+      link: buttonLink || null,
+      type: linkType,
+      target: linkType === 'external' ? 'new_tab' : 'same_tab',
+    };
+
+    out.adminUi = { canEdit: true, canDelete: true };
+
+    out.actions = [
+      { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+      { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+      { type: 'delete', label: 'Delete', url: baseUrl, enabled: hasId },
+    ];
+
+    return out;
+  });
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for a single hero slide (GET by id). Keeps data as object.
+ */
+function buildHeroSlideData(slide) {
+  if (!slide || typeof slide !== 'object') return slide;
+
+  const id = slide._id != null ? String(slide._id) : slide.id != null ? String(slide.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/hero-slides/${id}` : null;
+
+  const out = { ...slide };
+
+  if (slide.mediaUrl != null && String(slide.mediaUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(slide.mediaUrl),
+      kind: mediaKind(slide.mediaUrl),
+      alt: slide.title != null && String(slide.title).trim() !== '' ? slide.title : 'Hero slide',
+    };
+  }
+
+  const buttonLink = slide.buttonLink != null ? String(slide.buttonLink).trim() : null;
+  const linkType =
+    !buttonLink || buttonLink === ''
+      ? 'none'
+      : /^https?:\/\//i.test(buttonLink)
+        ? 'external'
+        : 'internal';
+  out.cta = {
+    text: slide.buttonText != null ? slide.buttonText : null,
+    link: buttonLink || null,
+    type: linkType,
+    target: linkType === 'external' ? 'new_tab' : 'same_tab',
+  };
+
+  out.adminUi = { canEdit: true, canDelete: true };
+
+  out.actions = [
+    { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+    { type: 'delete', label: 'Delete', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/hero-slides', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for created hero slide response (POST). Keeps data as object.
+ */
+function buildCreateHeroSlideData(slide) {
+  if (!slide || typeof slide !== 'object') return slide;
+
+  const plain =
+    typeof slide.toObject === 'function' ? slide.toObject() : { ...slide };
+  const id = plain._id != null ? String(plain._id) : plain.id != null ? String(plain.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/hero-slides/${id}` : null;
+
+  const out = { ...plain };
+
+  if (plain.mediaUrl != null && String(plain.mediaUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(plain.mediaUrl),
+      kind: mediaKind(plain.mediaUrl),
+      alt: plain.title != null && String(plain.title).trim() !== '' ? plain.title : 'Hero slide',
+    };
+  }
+
+  const buttonLink = plain.buttonLink != null ? String(plain.buttonLink).trim() : null;
+  const linkType =
+    !buttonLink || buttonLink === ''
+      ? 'none'
+      : /^https?:\/\//i.test(buttonLink)
+        ? 'external'
+        : 'internal';
+  out.cta = {
+    text: plain.buttonText != null ? plain.buttonText : null,
+    link: buttonLink || null,
+    type: linkType,
+    target: linkType === 'external' ? 'new_tab' : 'same_tab',
+  };
+
+  out.adminUi = { canEdit: true, canDelete: true };
+
+  out.actions = [
+    { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+    { type: 'edit', label: 'Edit', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/hero-slides', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for updated hero slide response (PUT). Keeps data as object.
+ */
+function buildUpdateHeroSlideData(slide) {
+  if (!slide || typeof slide !== 'object') return slide;
+
+  const plain =
+    typeof slide.toObject === 'function' ? slide.toObject() : { ...slide };
+  const id = plain._id != null ? String(plain._id) : plain.id != null ? String(plain.id) : null;
+  const hasId = !!id;
+  const baseUrl = hasId ? `/admin/hero-slides/${id}` : null;
+
+  const out = { ...plain };
+
+  if (plain.mediaUrl != null && String(plain.mediaUrl).trim() !== '') {
+    out.media = {
+      url: absoluteUrl(plain.mediaUrl),
+      kind: mediaKind(plain.mediaUrl),
+      alt: plain.title != null && String(plain.title).trim() !== '' ? plain.title : 'Hero slide',
+    };
+  }
+
+  const buttonLink = plain.buttonLink != null ? String(plain.buttonLink).trim() : null;
+  const linkType =
+    !buttonLink || buttonLink === ''
+      ? 'none'
+      : /^https?:\/\//i.test(buttonLink)
+        ? 'external'
+        : 'internal';
+  out.cta = {
+    text: plain.buttonText != null ? plain.buttonText : null,
+    link: buttonLink || null,
+    type: linkType,
+    target: linkType === 'external' ? 'new_tab' : 'same_tab',
+  };
+
+  out.adminUi = { canEdit: true, canDelete: true };
+
+  out.actions = [
+    { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
+    { type: 'back_to_list', label: 'Back', url: '/admin/hero-slides', enabled: true },
+  ];
+
+  return out;
+}
+
+/**
+ * Build admin/mobile-friendly optional fields for deleted hero slide response.
+ * Only adds fields when data is an object; if data is null, returns null.
+ */
+function buildDeleteHeroSlideData(deleted) {
+  if (deleted == null || typeof deleted !== 'object') return deleted;
+
+  const deletionMeta = {
+    deletedAt: new Date().toISOString(),
+  };
+
+  const actions = [
+    { type: 'back_to_list', label: 'Back', url: '/admin/hero-slides', enabled: true },
+  ];
+
+  return { ...deleted, deletionMeta, actions };
+}
 
 // Hero Slides
 export async function getAllHeroSlides(req, res) {
   try {
     const slides = await adminService.getAllHeroSlides();
-    return ok(res, slides);
+    const data = buildHeroSlidesData(slides);
+    return ok(res, data);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch hero slides');
   }
@@ -28,7 +250,8 @@ export async function getHeroSlideById(req, res) {
     if (!slide) {
       return fail(res, 404, 'Hero slide not found');
     }
-    return ok(res, slide);
+    const data = buildHeroSlideData(slide);
+    return ok(res, data);
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to fetch hero slide');
   }
@@ -37,7 +260,8 @@ export async function getHeroSlideById(req, res) {
 export async function createHeroSlide(req, res) {
   try {
     const slide = await adminService.createHeroSlide(req.body);
-    return ok(res, slide, 'Hero slide created successfully');
+    const data = buildCreateHeroSlideData(slide);
+    return ok(res, data, 'Hero slide created successfully', null, 201);
   } catch (error) {
     return fail(res, 400, error.message || 'Failed to create hero slide');
   }
@@ -49,7 +273,8 @@ export async function updateHeroSlide(req, res) {
     if (!slide) {
       return fail(res, 404, 'Hero slide not found');
     }
-    return ok(res, slide, 'Hero slide updated successfully');
+    const data = buildUpdateHeroSlideData(slide);
+    return ok(res, data, 'Hero slide updated successfully');
   } catch (error) {
     return fail(res, 400, error.message || 'Failed to update hero slide');
   }
@@ -61,7 +286,8 @@ export async function deleteHeroSlide(req, res) {
     if (!slide) {
       return fail(res, 404, 'Hero slide not found');
     }
-    return ok(res, slide, 'Hero slide deleted successfully');
+    const data = buildDeleteHeroSlideData(slide);
+    return ok(res, data, 'Hero slide deleted successfully');
   } catch (error) {
     return fail(res, 500, error.message || 'Failed to delete hero slide');
   }
