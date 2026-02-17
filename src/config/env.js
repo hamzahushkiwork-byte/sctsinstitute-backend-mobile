@@ -38,6 +38,8 @@ export default {
   emailPass: process.env.EMAIL_PASS,
   emailFrom: process.env.EMAIL_FROM,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  /** Base URL for absolute links (e.g. images). APP_URL or PUBLIC_BASE_URL, no trailing slash. */
+  baseUrl: (process.env.APP_URL || process.env.PUBLIC_BASE_URL || '').trim().replace(/\/$/, ''),
 };
 
 export const MONGODB_URI = process.env.MONGODB_URI;
