@@ -224,18 +224,13 @@ export async function registerForCourse(req, res) {
       return fail(res, 400, 'Course ID is required');
     }
 
-<<<<<<< HEAD
     const registration = await courseRegistrationService.registerForCourse(
       courseId,
       userId,
       sessionDateKey,
     );
-    return ok(res, registration, 'Successfully registered for course', null, 201);
-=======
-    const registration = await courseRegistrationService.registerForCourse(courseId, userId);
     const data = buildRegisterData(registration);
     return ok(res, data, 'Successfully registered for course', null, 201);
->>>>>>> 8f199d108cf696bb2d2f1a0d54414cd137db135c
   } catch (error) {
     if (error.message === 'Course not found' || error.message === 'User not found') {
       return fail(res, 404, error.message);
@@ -340,7 +335,6 @@ export async function updateRegistrationStatus(req, res) {
       status,
       notes || ''
     );
-<<<<<<< HEAD
     let message = 'Registration status updated successfully';
     if (emailSent === true) {
       message += ' A notification email was sent to the user.';
@@ -348,11 +342,8 @@ export async function updateRegistrationStatus(req, res) {
       message +=
         ' The user could not be notified by email—check EMAIL_* / SMTP configuration on the server.';
     }
-    return ok(res, { ...registration, emailSent }, message);
-=======
     const data = buildUpdateStatusData(registration);
-    return ok(res, data, 'Registration status updated successfully');
->>>>>>> 8f199d108cf696bb2d2f1a0d54414cd137db135c
+    return ok(res, { ...data, emailSent }, message);
   } catch (error) {
     if (error.message === 'Registration not found') {
       return fail(res, 404, error.message);

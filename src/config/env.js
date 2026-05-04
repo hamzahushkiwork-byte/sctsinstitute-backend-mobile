@@ -40,7 +40,6 @@ export default {
   emailPass: process.env.EMAIL_PASS,
   emailFrom: process.env.EMAIL_FROM,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
-<<<<<<< HEAD
   testEmailSecret: process.env.TEST_EMAIL_SECRET,
   /** Resend HTTP API key — if set, emails go over HTTPS (port 443), bypassing SMTP blocks. */
   resendApiKey: process.env.RESEND_API_KEY,
@@ -50,10 +49,8 @@ export default {
   emailSmtpFamily:
     process.env.EMAIL_SMTP_FAMILY ||
     (process.env.EMAIL_SMTP_IPV4 === '1' || process.env.EMAIL_SMTP_IPV4 === 'true' ? '4' : ''),
-=======
   /** Base URL for absolute links (e.g. images). APP_URL or PUBLIC_BASE_URL, no trailing slash. */
   baseUrl: (process.env.APP_URL || process.env.PUBLIC_BASE_URL || '').trim().replace(/\/$/, ''),
->>>>>>> 8f199d108cf696bb2d2f1a0d54414cd137db135c
 };
 
 export const MONGODB_URI = process.env.MONGODB_URI;

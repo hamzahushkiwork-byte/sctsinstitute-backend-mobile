@@ -7,11 +7,8 @@ import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import config from '../../config/env.js';
 import { slugify, generateUniqueSlug } from '../../utils/slug.js';
-<<<<<<< HEAD
 import { parseAvailableDatesFromRequest } from '../../utils/courseAvailableDates.js';
-=======
 import { toAbsoluteUrl } from '../../utils/url.js';
->>>>>>> 8f199d108cf696bb2d2f1a0d54414cd137db135c
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

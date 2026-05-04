@@ -1,9 +1,7 @@
 import { ok, fail } from '../utils/response.js';
 import * as authService from '../services/auth.service.js';
 import { sendWelcomeEmail } from '../services/emailService.js';
-<<<<<<< HEAD
 import { sendAdminNotification } from '../services/mailer.js';
-=======
 import {
   ACCESS_TOKEN_EXPIRES_IN_SECONDS,
   REFRESH_TOKEN_EXPIRES_IN_SECONDS,
@@ -83,7 +81,6 @@ function buildRefreshData(result) {
     rotated: result.refreshToken != null,
   };
 }
->>>>>>> 8f199d108cf696bb2d2f1a0d54414cd137db135c
 
 export async function login(req, res) {
   try {
@@ -110,7 +107,6 @@ export async function signup(req, res) {
       emailSent = false;
     }
 
-<<<<<<< HEAD
     try {
       await sendAdminNotification(result.user);
     } catch (err) {
@@ -120,14 +116,9 @@ export async function signup(req, res) {
     const message = emailSent
       ? 'User registered successfully. A confirmation email has been sent.'
       : 'User registered successfully. We could not send a confirmation email—please check that email (SMTP) is configured.';
-    
-=======
-    const message = emailSent
-      ? 'User registered successfully'
-      : 'Registered, but email failed to send';
+
     const data = buildSignupData(result, emailSent);
 
->>>>>>> 8f199d108cf696bb2d2f1a0d54414cd137db135c
     return res.status(201).json({
       success: true,
       data,
