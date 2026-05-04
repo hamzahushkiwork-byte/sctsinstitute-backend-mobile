@@ -1,9 +1,20 @@
 import { ok, fail } from '../utils/response.js';
-import { toAbsoluteUrl } from '../utils/url.js';
+import { toAbsoluteUrl, normalizePublicMediaPath } from '../utils/url.js';
 import config from '../config/env.js';
 import * as homeService from '../services/home.service.js';
 
-const BASE_URL = config.baseUrl || '';
+/**
+ * Public API base: APP_URL / PUBLIC_BASE_URL, or inferred from the request (host + protocol).
+ */
+function getPublicBaseUrl(req) {
+  const configured = (config.baseUrl || '').trim().replace(/\/$/, '');
+  if (configured) return configured;
+  const xfProto = (req.get('x-forwarded-proto') || '').split(',')[0].trim();
+  const proto = (xfProto || req.protocol || 'http').replace(/:+$/, '');
+  const host = (req.get('x-forwarded-host') || req.get('host') || '').split(',')[0].trim();
+  if (!host) return '';
+  return `${proto}://${host}`.replace(/\/$/, '');
+}
 
 /**
  * Detect media kind from URL (by extension). Returns "image" | "video" | "unknown".
@@ -18,10 +29,14 @@ function getMediaKind(mediaUrl) {
 
 /**
  * Build media object from hero slide mediaUrl; omit if no mediaUrl.
+ * @param {string} mediaUrl - Raw value from DB (path, /uploads/..., or bare filename)
+ * @param {string} [title]
+ * @param {string} publicBase - No trailing slash
  */
-function buildHeroMedia(mediaUrl, title) {
+function buildHeroMedia(mediaUrl, title, publicBase) {
   if (!mediaUrl || typeof mediaUrl !== 'string' || !mediaUrl.trim()) return undefined;
-  const url = toAbsoluteUrl(mediaUrl.trim(), BASE_URL);
+  const pathOrUrl = normalizePublicMediaPath(mediaUrl.trim());
+  const url = toAbsoluteUrl(pathOrUrl, publicBase);
   return {
     url,
     thumbUrl: url,
@@ -63,11 +78,14 @@ function buildUi(order, buttonLink) {
  */
 export async function getHeroSlides(req, res) {
   try {
+    const publicBase = getPublicBaseUrl(req);
     const slides = await homeService.getHeroSlides();
     const list = slides.map((s) => {
       const out = { ...s };
       if (s.mediaUrl && String(s.mediaUrl).trim()) {
-        out.media = buildHeroMedia(s.mediaUrl, s.title);
+        const pathOrUrl = normalizePublicMediaPath(String(s.mediaUrl).trim());
+        out.mediaUrl = toAbsoluteUrl(pathOrUrl, publicBase);
+        out.media = buildHeroMedia(s.mediaUrl, s.title, publicBase);
       }
       out.cta = buildCta(s.buttonText, s.buttonLink);
       out.ui = buildUi(s.order, s.buttonLink);
