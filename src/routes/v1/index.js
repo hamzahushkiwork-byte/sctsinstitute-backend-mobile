@@ -11,6 +11,7 @@ import contactRoutes from './contact.routes.js';
 import authRoutes from './auth.routes.js';
 import adminRoutes from './admin.routes.js';
 import courseRegistrationRoutes from './courseRegistration.routes.js';
+import testRoutes from './test.routes.js';
 import { ok } from '../../utils/response.js';
 
 const router = express.Router();
@@ -31,6 +32,7 @@ router.use('/contact', contactRoutes);
 router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 router.use('/course-registrations', courseRegistrationRoutes);
+router.use('/tests', testRoutes);
 
 export default router;
 

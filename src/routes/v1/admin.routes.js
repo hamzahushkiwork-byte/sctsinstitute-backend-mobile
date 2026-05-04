@@ -3,6 +3,7 @@ import path from 'path';
 import multer from 'multer';
 import { existsSync, mkdirSync } from 'fs';
 import * as adminController from '../../controllers/admin.controller.js';
+import * as testController from '../../controllers/test.controller.js';
 import authMiddleware from '../../middlewares/auth.middleware.js';
 import { requireAdminRole } from '../../middlewares/adminRole.middleware.js';
 import { validate } from '../../middlewares/validate.middleware.js';
@@ -99,6 +100,13 @@ const partnerUpload = multer({
 
 // All admin routes require authentication
 router.use(authMiddleware);
+
+// Test CRUD
+router.get('/tests', testController.getAllTests);
+router.get('/tests/:id', testController.getTestById);
+router.post('/tests', testController.createTest);
+router.put('/tests/:id', testController.updateTest);
+router.delete('/tests/:id', testController.deleteTest);
 
 // Hero Slides CRUD
 router.get('/hero-slides', adminController.getAllHeroSlides);

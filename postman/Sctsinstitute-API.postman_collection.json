@@ -475,6 +475,342 @@
 			]
 		},
 		{
+			"name": "Test",
+			"item": [
+				{
+					"name": "Get All Tests (Public)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Response has success true', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success', true);",
+									"});",
+									"pm.test('Response has data array', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_v1}}/tests",
+							"host": ["{{api_v1}}"],
+							"path": ["tests"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Tests (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Response has success true', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success', true);",
+									"});",
+									"pm.test('Response has data array', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});",
+									"pm.test('Response includes accessToken for authenticated request', function () {",
+									"    const jsonData = pm.response.json();",
+									"    if (pm.response.code === 200) pm.expect(jsonData).to.have.property('accessToken');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_v1}}/admin/tests",
+							"host": ["{{api_v1}}"],
+							"path": ["admin", "tests"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Test (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test('Response has success true', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success', true);",
+									"});",
+									"pm.test('Response data has required fields', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"    pm.expect(jsonData.data).to.have.property('value');",
+									"    pm.expect(jsonData.data).to.have.property('_id');",
+									"});",
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data._id) {",
+									"        pm.environment.set('test_id', jsonData.data._id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Item\",\n  \"value\": \"test-value\",\n  \"description\": \"A test item for API testing\",\n  \"isActive\": true,\n  \"order\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_v1}}/admin/tests",
+							"host": ["{{api_v1}}"],
+							"path": ["admin", "tests"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Test by ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Response has success true', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success', true);",
+									"});",
+									"pm.test('Response data has required fields', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('_id');",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_v1}}/admin/tests/{{test_id}}",
+							"host": ["{{api_v1}}"],
+							"path": ["admin", "tests", "{{test_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Test (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Response has success true', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success', true);",
+									"});",
+									"pm.test('Updated name is reflected in response', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.name).to.eql('Updated Test Item');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Test Item\",\n  \"value\": \"updated-value\",\n  \"description\": \"Updated description\",\n  \"isActive\": true,\n  \"order\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_v1}}/admin/tests/{{test_id}}",
+							"host": ["{{api_v1}}"],
+							"path": ["admin", "tests", "{{test_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Test (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Response has success true', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success', true);",
+									"});",
+									"pm.test('Deleted test data is returned', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_v1}}/admin/tests/{{test_id}}",
+							"host": ["{{api_v1}}"],
+							"path": ["admin", "tests", "{{test_id}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Admin (Protected)",
 			"item": [
 				{
