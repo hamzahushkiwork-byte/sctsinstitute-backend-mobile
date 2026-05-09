@@ -51,6 +51,18 @@ export default {
     (process.env.EMAIL_SMTP_IPV4 === '1' || process.env.EMAIL_SMTP_IPV4 === 'true' ? '4' : ''),
   /** Base URL for absolute links (e.g. images). APP_URL or PUBLIC_BASE_URL, no trailing slash. */
   baseUrl: (process.env.APP_URL || process.env.PUBLIC_BASE_URL || '').trim().replace(/\/$/, ''),
+  /**
+   * Canonical API origin for `/uploads/*` URLs in JSON responses (hero slides, etc.).
+   * No trailing slash; do not include `/uploads` here — it is appended automatically.
+   * Override with UPLOADS_PUBLIC_ORIGIN (e.g. http://localhost:8080 for local).
+   */
+  uploadsPublicOrigin: (
+    process.env.UPLOADS_PUBLIC_ORIGIN ||
+    'https://sctsinstitute-backend-production.up.railway.app'
+  )
+    .trim()
+    .replace(/\/$/, '')
+    .replace(/\/uploads$/i, ''),
 };
 
 export const MONGODB_URI = process.env.MONGODB_URI;

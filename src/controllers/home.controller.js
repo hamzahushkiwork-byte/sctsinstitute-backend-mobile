@@ -1,5 +1,9 @@
 import { ok, fail } from '../utils/response.js';
-import { toAbsoluteUrl, normalizePublicMediaPath } from '../utils/url.js';
+import {
+  toAbsoluteUrl,
+  normalizePublicMediaPath,
+  resolveUploadsPublicUrl,
+} from '../utils/url.js';
 import config from '../config/env.js';
 import * as homeService from '../services/home.service.js';
 
@@ -28,19 +32,30 @@ function getMediaKind(mediaUrl) {
 }
 
 /**
+ * Final public URL for hero slide media (static uploads host when configured).
+ */
+function resolveHeroSlideMediaUrl(raw, req) {
+  const staticOrigin = (config.uploadsPublicOrigin || '').trim();
+  if (staticOrigin) {
+    const u = resolveUploadsPublicUrl(raw, staticOrigin);
+    if (u) return u;
+  }
+  const pathOrUrl = normalizePublicMediaPath(String(raw).trim());
+  return toAbsoluteUrl(pathOrUrl, getPublicBaseUrl(req));
+}
+
+/**
  * Build media object from hero slide mediaUrl; omit if no mediaUrl.
  * @param {string} mediaUrl - Raw value from DB (path, /uploads/..., or bare filename)
  * @param {string} [title]
- * @param {string} publicBase - No trailing slash
+ * @param {string} absoluteUrl - Already-resolved URL
  */
-function buildHeroMedia(mediaUrl, title, publicBase) {
+function buildHeroMedia(mediaUrl, title, absoluteUrl) {
   if (!mediaUrl || typeof mediaUrl !== 'string' || !mediaUrl.trim()) return undefined;
-  const pathOrUrl = normalizePublicMediaPath(mediaUrl.trim());
-  const url = toAbsoluteUrl(pathOrUrl, publicBase);
   return {
-    url,
-    thumbUrl: url,
-    mediumUrl: url,
+    url: absoluteUrl,
+    thumbUrl: absoluteUrl,
+    mediumUrl: absoluteUrl,
     alt: (title != null && String(title).trim()) || 'Hero slide',
     kind: getMediaKind(mediaUrl),
   };
@@ -78,14 +93,13 @@ function buildUi(order, buttonLink) {
  */
 export async function getHeroSlides(req, res) {
   try {
-    const publicBase = getPublicBaseUrl(req);
     const slides = await homeService.getHeroSlides();
     const list = slides.map((s) => {
       const out = { ...s };
       if (s.mediaUrl && String(s.mediaUrl).trim()) {
-        const pathOrUrl = normalizePublicMediaPath(String(s.mediaUrl).trim());
-        out.mediaUrl = toAbsoluteUrl(pathOrUrl, publicBase);
-        out.media = buildHeroMedia(s.mediaUrl, s.title, publicBase);
+        const absolute = resolveHeroSlideMediaUrl(s.mediaUrl, req);
+        out.mediaUrl = absolute;
+        out.media = buildHeroMedia(s.mediaUrl, s.title, absolute);
       }
       out.cta = buildCta(s.buttonText, s.buttonLink);
       out.ui = buildUi(s.order, s.buttonLink);

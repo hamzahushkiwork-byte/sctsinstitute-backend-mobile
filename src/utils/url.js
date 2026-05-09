@@ -36,3 +36,41 @@ export function toAbsoluteUrl(url, baseUrl) {
   const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   return `${base}${path}`;
 }
+
+/**
+ * Rewrite any reference to `/uploads/...` to use `staticOrigin` (canonical file host).
+ * - Full URLs like https://other-host/uploads/file.mp4 → https://staticOrigin/uploads/file.mp4
+ * - Paths /uploads/... or bare filenames → same under staticOrigin
+ * - Full URLs with no /uploads/ path are returned unchanged (external CDN).
+ * @param {string} pathOrUrl
+ * @param {string} staticOrigin - e.g. https://sctsinstitute-backend-production.up.railway.app
+ * @returns {string|null} null if staticOrigin is empty
+ */
+export function resolveUploadsPublicUrl(pathOrUrl, staticOrigin) {
+  const origin = (staticOrigin || '').trim().replace(/\/$/, '').replace(/\/uploads$/i, '');
+  if (!origin) return null;
+
+  const t = (pathOrUrl || '').trim();
+  if (!t) return null;
+
+  if (/^https?:\/\//i.test(t) && !/\/uploads\//i.test(t)) {
+    return t;
+  }
+
+  const m = t.match(/\/uploads\/([^?#]+)(\?[^#]*)?(#.*)?$/i);
+  if (m) {
+    const rest = m[1] + (m[2] || '') + (m[3] || '');
+    return `${origin}/uploads/${rest}`;
+  }
+
+  const normalized = normalizePublicMediaPath(t);
+  if (normalized.startsWith('/uploads/')) {
+    return `${origin}${normalized}`;
+  }
+
+  if (/^https?:\/\//i.test(t)) {
+    return t;
+  }
+
+  return toAbsoluteUrl(normalized, origin);
+}
