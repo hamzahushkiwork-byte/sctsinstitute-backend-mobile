@@ -2,13 +2,14 @@
   "info": {
     "_postman_id": "scts-institute-api-collection",
     "name": "SCTS Institute API",
-    "description": "Import this file in Postman (Import → File). Then import an environment from the same `postman/` folder and select it in the top-right.\n\n**Dynamic base URL:** every request uses `{{baseUrl}}`. Change `baseUrl` in the active environment (local vs staging vs production) without editing requests.\n\n**Auth:** set `userEmail` and `userPassword` in the environment, run **Auth → Login**. Tests on that request save `accessToken` and `refreshToken` to the environment. Admin and protected folders send `Authorization: Bearer {{accessToken}}`.",
+    "description": "Import this file in Postman (Import → File). Then import an environment from the same `postman/` folder and select it in the top-right.\n\n**Dynamic base URL:** every request uses `{{baseUrl}}`. Change `baseUrl` in the active environment (local vs staging vs production) without editing requests.\n\n**Auth:** set `userEmail` and `userPassword` in the environment, run **Auth → Login**. Tests on that request save `accessToken` and `refreshToken` to the environment. Admin and protected folders send `Authorization: Bearer {{accessToken}}`.\n\n**Uploads / hero slides:** Responses may rewrite `mediaUrl` under `/uploads/` to the canonical `UPLOADS_PUBLIC_ORIGIN` host. Use `{{baseUrl}}` here only for HTTP requests to this API.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080"
+      "value": "http://localhost:8080",
+      "type": "string"
     }
   ],
   "item": [
@@ -20,7 +21,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/"
+            "url": {
+              "raw": "{{baseUrl}}/"
+            }
           },
           "response": []
         },
@@ -29,7 +32,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/health"
+            "url": {
+              "raw": "{{baseUrl}}/health"
+            }
           },
           "response": []
         },
@@ -38,7 +43,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/openapi.json"
+            "url": {
+              "raw": "{{baseUrl}}/openapi.json"
+            }
           },
           "response": []
         }
@@ -52,7 +59,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/health"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health"
+            }
           },
           "response": []
         },
@@ -61,7 +70,31 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/home/hero-slides"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/home/hero-slides"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Home — Trending courses (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/home/trending-courses"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Home — Mobile slides (public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/home/mobile-slides"
+            }
           },
           "response": []
         },
@@ -70,7 +103,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/services"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services"
+            }
           },
           "response": []
         },
@@ -79,7 +114,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/services/{{serviceSlug}}"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceSlug}}"
+            }
           },
           "response": []
         },
@@ -88,7 +125,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/certification"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certification"
+            }
           },
           "response": []
         },
@@ -97,7 +136,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/certification/{{certSlug}}"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/certification/{{certSlug}}"
+            }
           },
           "response": []
         },
@@ -106,7 +147,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/courses"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/courses"
+            }
           },
           "response": []
         },
@@ -115,7 +158,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/courses/{{courseSlug}}"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/courses/{{courseSlug}}"
+            }
           },
           "response": []
         },
@@ -124,7 +169,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/partners"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/partners"
+            }
           },
           "response": []
         },
@@ -133,7 +180,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/partners/public"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/partners/public"
+            }
           },
           "response": []
         },
@@ -142,7 +191,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/pages/{{pageKey}}"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{pageKey}}"
+            }
           },
           "response": []
         }
@@ -182,7 +233,9 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
             },
-            "url": "{{baseUrl}}/api/v1/auth/login"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login"
+            }
           },
           "response": []
         },
@@ -200,7 +253,9 @@
               "mode": "raw",
               "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"{{userEmail}}\",\n  \"phoneNumber\": \"+1 555 0100\",\n  \"password\": \"Str0ng!Pass\"\n}"
             },
-            "url": "{{baseUrl}}/api/v1/auth/signup"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/signup"
+            }
           },
           "response": []
         },
@@ -234,7 +289,9 @@
               "mode": "raw",
               "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
             },
-            "url": "{{baseUrl}}/api/v1/auth/refresh"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh"
+            }
           },
           "response": []
         },
@@ -252,7 +309,9 @@
               "mode": "raw",
               "raw": "{}"
             },
-            "url": "{{baseUrl}}/api/v1/auth/logout"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout"
+            }
           },
           "response": []
         },
@@ -270,7 +329,9 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{userEmail}}\"\n}"
             },
-            "url": "{{baseUrl}}/api/v1/auth/forgot-password"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password"
+            }
           },
           "response": []
         },
@@ -288,7 +349,9 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"otp\": \"123456\",\n  \"password\": \"Str0ng!New\"\n}"
             },
-            "url": "{{baseUrl}}/api/v1/auth/reset-password"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/reset-password"
+            }
           },
           "response": []
         }
@@ -311,7 +374,9 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"visitor@example.com\",\n  \"phone\": \"+1 555 0199\",\n  \"subject\": \"Hello\",\n  \"message\": \"Message from Postman\"\n}"
             },
-            "url": "{{baseUrl}}/api/v1/contact"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/contact"
+            }
           },
           "response": []
         }
@@ -344,7 +409,9 @@
               "mode": "raw",
               "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"sessionDateKey\": \"\"\n}"
             },
-            "url": "{{baseUrl}}/api/v1/course-registrations/register"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/course-registrations/register"
+            }
           },
           "response": []
         },
@@ -353,7 +420,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/course-registrations/my-registrations"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/course-registrations/my-registrations"
+            }
           },
           "response": []
         },
@@ -362,7 +431,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/course-registrations/course/{{courseId}}"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/course-registrations/course/{{courseId}}"
+            }
           },
           "response": []
         },
@@ -371,7 +442,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/course-registrations/admin"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/course-registrations/admin"
+            }
           },
           "response": []
         },
@@ -380,7 +453,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/v1/course-registrations/admin/course/{{courseId}}"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/course-registrations/admin/course/{{courseId}}"
+            }
           },
           "response": []
         },
@@ -398,7 +473,9 @@
               "mode": "raw",
               "raw": "{\n  \"status\": \"pending\",\n  \"notes\": \"\"\n}"
             },
-            "url": "{{baseUrl}}/api/v1/course-registrations/admin/{{registrationId}}/status"
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/course-registrations/admin/{{registrationId}}/status"
+            }
           },
           "response": []
         }
@@ -425,7 +502,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/hero-slides"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/hero-slides"
+                }
               },
               "response": []
             },
@@ -434,7 +513,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+                }
               },
               "response": []
             },
@@ -452,7 +533,9 @@
                   "mode": "raw",
                   "raw": "{\n  \"type\": \"image\",\n  \"title\": \"Postman test\",\n  \"mediaUrl\": \"https://example.com/banner.jpg\",\n  \"order\": 0,\n  \"isActive\": true\n}"
                 },
-                "url": "{{baseUrl}}/api/v1/admin/hero-slides"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/hero-slides"
+                }
               },
               "response": []
             },
@@ -470,7 +553,9 @@
                   "mode": "raw",
                   "raw": "{\n  \"type\": \"image\",\n  \"title\": \"Updated\",\n  \"mediaUrl\": \"https://example.com/banner2.jpg\",\n  \"order\": 1,\n  \"isActive\": true\n}"
                 },
-                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+                }
               },
               "response": []
             },
@@ -479,7 +564,213 @@
               "request": {
                 "method": "DELETE",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Trending courses (admin)",
+          "item": [
+            {
+              "name": "List trending courses",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/trending-courses"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get trending row by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/trending-courses/{{trendingCourseId}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add course to trending",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"order\": 0,\n  \"price\": null,\n  \"isActive\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/trending-courses"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update trending row (price + order)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"order\": 1,\n  \"price\": 99.99,\n  \"isActive\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/trending-courses/{{trendingCourseId}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Remove from trending",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/trending-courses/{{trendingCourseId}}"
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Mobile slides (admin)",
+          "item": [
+            {
+              "name": "List mobile slides",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/mobile-slides"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get mobile slide by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/mobile-slides/{{mobileSlideId}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create mobile slide (course link, multipart)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "title", "value": "Welcome", "type": "text" },
+                    { "key": "body", "value": "Short subtitle", "type": "text" },
+                    { "key": "type", "value": "course", "type": "text" },
+                    { "key": "courseId", "value": "{{courseId}}", "type": "text" },
+                    { "key": "order", "value": "0", "type": "text" },
+                    { "key": "isActive", "value": "true", "type": "text" },
+                    { "key": "images", "type": "file", "src": [] }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/mobile-slides"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create mobile slide (certificate link, multipart)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "title", "value": "Featured certificate", "type": "text" },
+                    { "key": "body", "value": "", "type": "text" },
+                    { "key": "type", "value": "certificate", "type": "text" },
+                    { "key": "certificateId", "value": "{{certificateId}}", "type": "text" },
+                    { "key": "order", "value": "1", "type": "text" },
+                    { "key": "isActive", "value": "true", "type": "text" },
+                    { "key": "images", "type": "file", "src": [] }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/mobile-slides"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create mobile slide (no link, multipart)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "title", "value": "Information slide", "type": "text" },
+                    { "key": "body", "value": "Informational only", "type": "text" },
+                    { "key": "type", "value": "", "type": "text" },
+                    { "key": "order", "value": "2", "type": "text" },
+                    { "key": "isActive", "value": "true", "type": "text" },
+                    { "key": "images", "type": "file", "src": [] }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/mobile-slides"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update mobile slide (multipart, image optional)",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "title", "value": "Updated title", "type": "text" },
+                    { "key": "order", "value": "0", "type": "text" },
+                    { "key": "isActive", "value": "true", "type": "text" },
+                    { "key": "images", "type": "file", "src": [], "disabled": true }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/mobile-slides/{{mobileSlideId}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete mobile slide",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/mobile-slides/{{mobileSlideId}}"
+                }
               },
               "response": []
             }
@@ -493,7 +784,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/services"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/services"
+                }
               },
               "response": []
             },
@@ -502,7 +795,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+                }
               },
               "response": []
             },
@@ -511,7 +806,9 @@
               "request": {
                 "method": "PATCH",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}/active"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}/active"
+                }
               },
               "response": []
             },
@@ -520,7 +817,9 @@
               "request": {
                 "method": "DELETE",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+                }
               },
               "response": []
             }
@@ -534,7 +833,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/courses"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/courses"
+                }
               },
               "response": []
             },
@@ -543,7 +844,51 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create course (multipart, with price)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "title", "value": "New course", "type": "text" },
+                    { "key": "cardBody", "value": "Short summary", "type": "text" },
+                    { "key": "description", "value": "Full description", "type": "text" },
+                    { "key": "sortOrder", "value": "0", "type": "text" },
+                    { "key": "isActive", "value": "true", "type": "text" },
+                    { "key": "isAvailable", "value": "true", "type": "text" },
+                    { "key": "price", "value": "99.99", "type": "text" },
+                    { "key": "image", "type": "file", "src": [], "disabled": true }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/courses"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update course (multipart, change price)",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "price", "value": "0", "type": "text" },
+                    { "key": "image", "type": "file", "src": [], "disabled": true }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+                }
               },
               "response": []
             },
@@ -552,7 +897,9 @@
               "request": {
                 "method": "PATCH",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}/toggle-availability"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}/toggle-availability"
+                }
               },
               "response": []
             },
@@ -561,7 +908,9 @@
               "request": {
                 "method": "DELETE",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+                }
               },
               "response": []
             }
@@ -575,7 +924,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/partners"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/partners"
+                }
               },
               "response": []
             },
@@ -584,7 +935,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+                }
               },
               "response": []
             },
@@ -593,7 +946,9 @@
               "request": {
                 "method": "DELETE",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+                }
               },
               "response": []
             }
@@ -607,7 +962,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/certification"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/certification"
+                }
               },
               "response": []
             },
@@ -616,7 +973,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+                }
               },
               "response": []
             },
@@ -625,7 +984,9 @@
               "request": {
                 "method": "PATCH",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}/active"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}/active"
+                }
               },
               "response": []
             },
@@ -634,7 +995,9 @@
               "request": {
                 "method": "DELETE",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+                }
               },
               "response": []
             }
@@ -648,7 +1011,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/pages"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/pages"
+                }
               },
               "response": []
             },
@@ -657,7 +1022,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/pages/{{pageKey}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/pages/{{pageKey}}"
+                }
               },
               "response": []
             },
@@ -666,7 +1033,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/contact-messages"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/contact-messages"
+                }
               },
               "response": []
             },
@@ -675,7 +1044,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/contact-messages/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/contact-messages/{{mongoId}}"
+                }
               },
               "response": []
             },
@@ -693,7 +1064,9 @@
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"read\"\n}"
                 },
-                "url": "{{baseUrl}}/api/v1/admin/contact-messages/{{mongoId}}"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/contact-messages/{{mongoId}}"
+                }
               },
               "response": []
             },
@@ -702,7 +1075,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/users"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/users"
+                }
               },
               "response": []
             }
@@ -725,7 +1100,9 @@
                   "mode": "raw",
                   "raw": "{\n  \"subject\": \"Test from Postman\",\n  \"text\": \"Hello from API test.\",\n  \"html\": \"\",\n  \"includeAdmins\": false\n}"
                 },
-                "url": "{{baseUrl}}/api/v1/admin/broadcast-emails"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/broadcast-emails"
+                }
               },
               "response": []
             },
@@ -734,7 +1111,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/broadcast-emails"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/broadcast-emails"
+                }
               },
               "response": []
             },
@@ -743,7 +1122,9 @@
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": "{{baseUrl}}/api/v1/admin/course-registrations"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/course-registrations"
+                }
               },
               "response": []
             },
@@ -761,7 +1142,9 @@
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"paid\",\n  \"notes\": \"\"\n}"
                 },
-                "url": "{{baseUrl}}/api/v1/admin/course-registrations/{{registrationId}}/status"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/course-registrations/{{registrationId}}/status"
+                }
               },
               "response": []
             },
@@ -780,7 +1163,9 @@
                     }
                   ]
                 },
-                "url": "{{baseUrl}}/api/v1/admin/uploads"
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/uploads"
+                }
               },
               "response": []
             }

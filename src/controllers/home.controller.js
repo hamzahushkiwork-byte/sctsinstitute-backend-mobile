@@ -91,6 +91,55 @@ function buildUi(order, buttonLink) {
  * Get hero slides (public).
  * Returns array of active slides; keeps all existing fields and adds optional mobile-friendly fields (media, cta, ui).
  */
+/**
+ * GET /api/v1/home/trending-courses — public, no auth.
+ * Only trending rows with isActive true and an active populated course.
+ * Returns price (custom override if set, otherwise course.price).
+ */
+export async function getTrendingCourses(req, res) {
+  try {
+    const rows = await homeService.getTrendingCoursesForPublic();
+    const list = rows
+      .filter((t) => t.courseId && typeof t.courseId === 'object')
+      .map((t) => {
+        const customPrice = t.price === undefined ? null : t.price;
+        const coursePrice = t.courseId?.price ?? null;
+        const displayPrice = customPrice !== null && customPrice !== undefined ? customPrice : coursePrice;
+        return {
+          _id: t._id,
+          order: t.order,
+          price: customPrice,
+          displayPrice,
+          isCustomPrice: customPrice !== null && customPrice !== undefined,
+          course: t.courseId,
+        };
+      });
+    return ok(res, list);
+  } catch (error) {
+    return fail(res, 500, error.message || 'Failed to fetch trending courses');
+  }
+}
+
+/**
+ * GET /api/v1/home/mobile-slides — public, no auth.
+ * Active slides; image URL is absolutized to the canonical uploads origin.
+ */
+export async function getMobileSlides(req, res) {
+  try {
+    const rows = await homeService.getMobileSlidesForPublic();
+    const list = rows.map((s) => {
+      const out = { ...s };
+      if (s.images && String(s.images).trim()) {
+        out.imageUrl = resolveHeroSlideMediaUrl(s.images, req);
+      }
+      return out;
+    });
+    return ok(res, list);
+  } catch (error) {
+    return fail(res, 500, error.message || 'Failed to fetch mobile slides');
+  }
+}
+
 export async function getHeroSlides(req, res) {
   try {
     const slides = await homeService.getHeroSlides();

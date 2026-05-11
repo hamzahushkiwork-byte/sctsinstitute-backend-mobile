@@ -13,6 +13,8 @@ import partnersAdminRoutes from '../admin/partners.routes.js';
 import servicesAdminRoutes from '../admin/services.routes.js';
 import certificationAdminRoutes from '../admin/certification.admin.routes.js';
 import coursesAdminRoutes from '../admin/courses.admin.routes.js';
+import trendingCoursesAdminRoutes from '../admin/trendingCourses.admin.routes.js';
+import mobileSlidesAdminRoutes from '../admin/mobileSlides.admin.routes.js';
 import config from '../../config/env.js';
 
 const router = express.Router();
@@ -120,6 +122,12 @@ router.use('/', servicesAdminRoutes);
 
 // Courses CRUD - Mount separate routes module
 router.use('/', coursesAdminRoutes);
+
+// Trending courses (admin)
+router.use('/', trendingCoursesAdminRoutes);
+
+// Mobile slides (admin)
+router.use('/', mobileSlidesAdminRoutes);
 
 // Partners CRUD - Mount separate routes module
 router.use('/', partnersAdminRoutes);
