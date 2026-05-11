@@ -43,7 +43,7 @@ export function toAbsoluteUrl(url, baseUrl) {
  * - Paths /uploads/... or bare filenames → same under staticOrigin
  * - Full URLs with no /uploads/ path are returned unchanged (external CDN).
  * @param {string} pathOrUrl
- * @param {string} staticOrigin - e.g. https://sctsinstitute-backend-production.up.railway.app
+ * @param {string} staticOrigin - e.g. https://sctsinstitute-backend-mobile-production.up.railway.app
  * @returns {string|null} null if staticOrigin is empty
  */
 export function resolveUploadsPublicUrl(pathOrUrl, staticOrigin) {

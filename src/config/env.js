@@ -58,7 +58,7 @@ export default {
    */
   uploadsPublicOrigin: (
     process.env.UPLOADS_PUBLIC_ORIGIN ||
-    'https://sctsinstitute-backend-production.up.railway.app'
+    'https://sctsinstitute-backend-mobile-production.up.railway.app'
   )
     .trim()
     .replace(/\/$/, '')

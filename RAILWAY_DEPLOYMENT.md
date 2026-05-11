@@ -35,7 +35,7 @@ Railway uses dynamic IPs, so you must allow all IPs (`0.0.0.0/0`) for Atlas to a
 4. **Networking**:
    - Go to **Service > Settings > Domains**.
    - Click **Generate Domain**.
-   - Railway will provide a public URL like `https://sctsinstitute-backend-production.up.railway.app`.
+   - Railway will provide a public URL like `https://sctsinstitute-backend-mobile-production.up.railway.app`.
 
 ## Validation
 Confirm the following endpoints work:
