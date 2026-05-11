@@ -17,6 +17,7 @@ export async function getTrendingCoursesForPublic() {
     .populate({
       path: 'courseId',
       match: { isActive: true },
+      select: 'title slug cardBody imageUrl isAvailable price availableDates sessionTime location',
     })
     .lean();
 }

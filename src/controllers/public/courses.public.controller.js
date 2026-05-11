@@ -42,6 +42,21 @@ function buildMedia(imageUrl, title) {
 }
 
 /**
+ * Build a friendly pricing object: { amount, isFree, display, currency }.
+ */
+function buildPricing(price, currency = 'USD') {
+  const num = Number.isFinite(price) ? price : Number(price);
+  const amount = Number.isFinite(num) ? num : 0;
+  const isFree = amount <= 0;
+  return {
+    amount,
+    isFree,
+    currency,
+    display: isFree ? 'Free' : `$${amount.toFixed(2)}`,
+  };
+}
+
+/**
  * Build actions array for a course.
  */
 function buildActions(slug, canRegister) {
@@ -81,7 +96,9 @@ export async function getActiveCourses(req, res) {
 
     const courses = await Course.find(query)
       .sort({ sortOrder: 1, createdAt: -1 })
-      .select('title slug cardBody imageUrl isAvailable availableDates sessionTime location')
+      .select(
+        'title slug cardBody imageUrl isAvailable availableDates sessionTime location price'
+      )
       .lean();
 
     const canRegister = (c) => c.isAvailable === true && c.isActive === true;
@@ -90,6 +107,8 @@ export async function getActiveCourses(req, res) {
       const isAvailable = c.isAvailable === true;
       const canReg = canRegister(c);
       const out = { ...c };
+      out.price = c.price ?? 0;
+      out.pricing = buildPricing(c.price);
       out.shortDescription = buildShortDescription(c.description, c.cardBody);
       out.availabilityStatus = getAvailabilityStatus(c.isAvailable);
       out.canRegister = canReg;
@@ -124,7 +143,7 @@ export async function getCourseBySlug(req, res) {
       isActive: true,
     })
       .select(
-        'title slug cardBody description imageUrl isAvailable availableDates sessionTime location'
+        'title slug cardBody description imageUrl isAvailable availableDates sessionTime location price'
       )
       .lean();
 
@@ -138,6 +157,8 @@ export async function getCourseBySlug(req, res) {
       buildShortDescription(course.description, course.cardBody);
 
     const out = { ...course };
+    out.price = course.price ?? 0;
+    out.pricing = buildPricing(course.price);
     out.shortDescription = shortDesc || null;
     out.availabilityStatus = getAvailabilityStatus(course.isAvailable);
     out.canRegister = canReg;

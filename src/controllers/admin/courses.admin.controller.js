@@ -21,6 +21,21 @@ function absoluteUrl(url) {
 }
 
 /**
+ * Friendly pricing object: { amount, isFree, display, currency }.
+ */
+function buildPricing(price, currency = 'USD') {
+  const num = Number.isFinite(price) ? price : Number(price);
+  const amount = Number.isFinite(num) ? num : 0;
+  const isFree = amount <= 0;
+  return {
+    amount,
+    isFree,
+    currency,
+    display: isFree ? 'Free' : `$${amount.toFixed(2)}`,
+  };
+}
+
+/**
  * Build admin/mobile-friendly optional fields for admin courses list. Keeps data as array.
  */
 function buildAdminCoursesData(courses) {
@@ -58,6 +73,9 @@ function buildAdminCoursesData(courses) {
     out.availabilityStatus = isAvail ? 'available' : 'coming_soon';
 
     out.canRegister = c.isActive === true && c.isAvailable === true;
+
+    out.price = c.price ?? 0;
+    out.pricing = buildPricing(c.price);
 
     out.adminUi = {
       canEdit: true,
@@ -108,6 +126,9 @@ function buildCourseByIdData(course) {
 
   out.availabilityStatus = course.isAvailable === true ? 'available' : 'coming_soon';
   out.canRegister = course.isActive === true && course.isAvailable === true;
+
+  out.price = course.price ?? 0;
+  out.pricing = buildPricing(course.price);
 
   out.content = {
     summary: card || out.shortDescription || null,
@@ -167,6 +188,9 @@ function buildCreateCourseData(course) {
   out.availabilityStatus = plain.isAvailable === true ? 'available' : 'coming_soon';
   out.canRegister = plain.isActive === true && plain.isAvailable === true;
 
+  out.price = plain.price ?? 0;
+  out.pricing = buildPricing(plain.price);
+
   out.adminUi = {
     canEdit: true,
     canDelete: true,
@@ -217,6 +241,9 @@ function buildUpdateCourseData(course) {
   out.availabilityStatus = plain.isAvailable === true ? 'available' : 'coming_soon';
   out.canRegister = plain.isActive === true && plain.isAvailable === true;
 
+  out.price = plain.price ?? 0;
+  out.pricing = buildPricing(plain.price);
+
   out.adminUi = {
     canEdit: true,
     canDelete: true,
@@ -262,13 +289,15 @@ function buildToggleCourseAvailabilityData(course) {
 
   const availabilityStatus = plain.isAvailable === true ? 'available' : 'coming_soon';
   const canRegister = plain.isActive === true && plain.isAvailable === true;
+  const price = plain.price ?? 0;
+  const pricing = buildPricing(plain.price);
 
   const actions = [
     { type: 'view', label: 'View', url: baseUrl, enabled: hasId },
     { type: 'back_to_list', label: 'Back', url: '/admin/courses', enabled: true },
   ];
 
-  return { ...plain, toggleMeta, availabilityStatus, canRegister, actions };
+  return { ...plain, toggleMeta, availabilityStatus, canRegister, price, pricing, actions };
 }
 
 /**

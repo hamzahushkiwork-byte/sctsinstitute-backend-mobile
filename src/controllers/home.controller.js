@@ -104,13 +104,25 @@ export async function getTrendingCourses(req, res) {
       .map((t) => {
         const customPrice = t.price === undefined ? null : t.price;
         const coursePrice = t.courseId?.price ?? null;
-        const displayPrice = customPrice !== null && customPrice !== undefined ? customPrice : coursePrice;
+        const isCustomPrice = customPrice !== null && customPrice !== undefined;
+        const displayAmount = isCustomPrice ? customPrice : coursePrice ?? 0;
+        const amountNum = Number.isFinite(displayAmount)
+          ? displayAmount
+          : Number(displayAmount) || 0;
+        const isFree = amountNum <= 0;
         return {
           _id: t._id,
           order: t.order,
           price: customPrice,
-          displayPrice,
-          isCustomPrice: customPrice !== null && customPrice !== undefined,
+          displayPrice: amountNum,
+          isCustomPrice,
+          pricing: {
+            amount: amountNum,
+            isFree,
+            currency: 'USD',
+            display: isFree ? 'Free' : `$${amountNum.toFixed(2)}`,
+            source: isCustomPrice ? 'custom' : 'course',
+          },
           course: t.courseId,
         };
       });
