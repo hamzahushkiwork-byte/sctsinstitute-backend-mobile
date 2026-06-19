@@ -22,33 +22,29 @@ export function normalizePublicMediaPath(pathOrUrl) {
 /**
  * Build an absolute URL for a path or existing URL.
  * - If url already starts with http/https, return as-is.
- * - Otherwise prefix with baseUrl (no double slashes).
+ * - Otherwise prefix with the static base URL: https://sctsinstitute-backend-production.up.railway.app
  * @param {string} url - Path (e.g. /uploads/foo.jpg) or full URL
- * @param {string} baseUrl - Base URL with no trailing slash (e.g. https://api.example.com)
+ * @param {string} [baseUrl] - Ignored, static URL is used instead
  * @returns {string} Absolute URL
  */
 export function toAbsoluteUrl(url, baseUrl) {
   if (!url || typeof url !== 'string') return url;
   const trimmed = url.trim();
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  if (!baseUrl || typeof baseUrl !== 'string') return trimmed;
-  const base = baseUrl.replace(/\/$/, '');
+  
+  const base = 'https://sctsinstitute-backend-production.up.railway.app';
   const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   return `${base}${path}`;
 }
 
 /**
- * Rewrite any reference to `/uploads/...` to use `staticOrigin` (canonical file host).
- * - Full URLs like https://other-host/uploads/file.mp4 → https://staticOrigin/uploads/file.mp4
- * - Paths /uploads/... or bare filenames → same under staticOrigin
- * - Full URLs with no /uploads/ path are returned unchanged (external CDN).
+ * Rewrite any reference to `/uploads/...` to use the static uploads origin.
  * @param {string} pathOrUrl
- * @param {string} staticOrigin - e.g. https://sctsinstitute-backend-mobile-production.up.railway.app
- * @returns {string|null} null if staticOrigin is empty
+ * @param {string} [staticOrigin] - Ignored, static URL is used instead
+ * @returns {string|null} resolved URL
  */
 export function resolveUploadsPublicUrl(pathOrUrl, staticOrigin) {
-  const origin = (staticOrigin || '').trim().replace(/\/$/, '').replace(/\/uploads$/i, '');
-  if (!origin) return null;
+  const origin = 'https://sctsinstitute-backend-production.up.railway.app';
 
   const t = (pathOrUrl || '').trim();
   if (!t) return null;

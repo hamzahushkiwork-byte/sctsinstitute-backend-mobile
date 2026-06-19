@@ -1,9 +1,6 @@
 import { ok, fail } from '../../utils/response.js';
 import CertificationService from '../../models/CertificationService.model.js';
-import { toAbsoluteUrl } from '../../utils/url.js';
-import config from '../../config/env.js';
 
-const BASE_URL = config.baseUrl || '';
 const SHORT_DESC_LENGTH = 160;
 
 /**
@@ -19,11 +16,24 @@ function buildShortDescription(description) {
 }
 
 /**
+ * Helper to resolve image URL with static prefix.
+ */
+function resolveCertificationImageUrl(raw) {
+  if (!raw || typeof raw !== 'string') return raw;
+  const trimmed = raw.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  
+  const prefix = 'https://sctsinstitute-backend-production.up.railway.app';
+  const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  return `${prefix}${path}`;
+}
+
+/**
  * Build media object from image URL. Omit if no imageUrl.
  */
 function buildCertificationMedia(imageUrl, title) {
   if (!imageUrl || typeof imageUrl !== 'string' || !imageUrl.trim()) return undefined;
-  const url = toAbsoluteUrl(imageUrl.trim(), BASE_URL);
+  const url = resolveCertificationImageUrl(imageUrl);
   return {
     url,
     thumbUrl: url,
@@ -73,6 +83,12 @@ export async function getActiveCertificationServices(req, res) {
 
     const list = services.map((s) => {
       const out = { ...s };
+      
+      // Resolve image URLs with static prefix URL
+      out.cardImageUrl = resolveCertificationImageUrl(s.cardImageUrl);
+      out.heroImageUrl = resolveCertificationImageUrl(s.heroImageUrl);
+      out.innerImageUrl = resolveCertificationImageUrl(s.innerImageUrl);
+
       out.shortDescription =
         (s.shortDescription != null && String(s.shortDescription).trim()) ||
         buildShortDescription(s.description) ||
@@ -117,6 +133,12 @@ export async function getCertificationServiceBySlug(req, res) {
     }
 
     const out = { ...service };
+    
+    // Resolve image URLs with static prefix URL
+    out.cardImageUrl = resolveCertificationImageUrl(service.cardImageUrl);
+    out.heroImageUrl = resolveCertificationImageUrl(service.heroImageUrl);
+    out.innerImageUrl = resolveCertificationImageUrl(service.innerImageUrl);
+
     out.shortDescription =
       (service.shortDescription != null && String(service.shortDescription).trim()) ||
       buildShortDescription(service.description) ||

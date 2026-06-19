@@ -3,7 +3,6 @@ import Course from '../../models/Course.model.js';
 import { toAbsoluteUrl } from '../../utils/url.js';
 import config from '../../config/env.js';
 
-const BASE_URL = config.baseUrl || '';
 const SHORT_DESC_LENGTH = 160;
 
 /**
@@ -30,7 +29,7 @@ function getAvailabilityStatus(isAvailable) {
  */
 function buildMedia(imageUrl, title) {
   if (!imageUrl || typeof imageUrl !== 'string' || !imageUrl.trim()) return undefined;
-  const url = toAbsoluteUrl(imageUrl.trim(), BASE_URL);
+  const url = toAbsoluteUrl(imageUrl.trim());
   return {
     url,
     thumbUrl: url,
@@ -107,6 +106,10 @@ export async function getActiveCourses(req, res) {
       const isAvailable = c.isAvailable === true;
       const canReg = canRegister(c);
       const out = { ...c };
+      
+      // Resolve direct image URL to absolute URL
+      out.imageUrl = toAbsoluteUrl(c.imageUrl);
+
       out.price = c.price ?? 0;
       out.pricing = buildPricing(c.price);
       out.shortDescription = buildShortDescription(c.description, c.cardBody);
@@ -157,6 +160,10 @@ export async function getCourseBySlug(req, res) {
       buildShortDescription(course.description, course.cardBody);
 
     const out = { ...course };
+    
+    // Resolve direct image URL to absolute URL
+    out.imageUrl = toAbsoluteUrl(course.imageUrl);
+
     out.price = course.price ?? 0;
     out.pricing = buildPricing(course.price);
     out.shortDescription = shortDesc || null;

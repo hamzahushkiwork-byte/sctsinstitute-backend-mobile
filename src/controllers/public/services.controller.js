@@ -3,7 +3,6 @@ import Service from '../../models/Service.model.js';
 import { toAbsoluteUrl } from '../../utils/url.js';
 import config from '../../config/env.js';
 
-const BASE_URL = config.baseUrl || '';
 const SHORT_DESC_LENGTH = 160;
 
 /**
@@ -23,7 +22,7 @@ function buildShortDescription(description) {
  */
 function buildServiceMedia(imageUrl, title) {
   if (!imageUrl || typeof imageUrl !== 'string' || !imageUrl.trim()) return undefined;
-  const url = toAbsoluteUrl(imageUrl.trim(), BASE_URL);
+  const url = toAbsoluteUrl(imageUrl.trim());
   return {
     url,
     thumbUrl: url,
@@ -75,6 +74,11 @@ export async function getActiveServices(req, res) {
 
     const list = services.map((s) => {
       const out = { ...s };
+      
+      // Resolve direct image URLs to absolute URLs
+      out.imageUrl = toAbsoluteUrl(s.imageUrl);
+      out.innerImageUrl = toAbsoluteUrl(s.innerImageUrl);
+
       out.shortDescription = buildShortDescription(s.description);
       if (s.imageUrl && String(s.imageUrl).trim()) {
         out.media = buildServiceMedia(s.imageUrl, s.title);
@@ -116,6 +120,11 @@ export async function getServiceBySlug(req, res) {
     }
 
     const out = { ...service };
+    
+    // Resolve direct image URLs to absolute URLs
+    out.imageUrl = toAbsoluteUrl(service.imageUrl);
+    out.innerImageUrl = toAbsoluteUrl(service.innerImageUrl);
+
     out.shortDescription = buildShortDescription(service.description);
     if (service.imageUrl && String(service.imageUrl).trim()) {
       out.media = buildServiceMedia(service.imageUrl, service.title);

@@ -7,6 +7,7 @@ import cors from "cors";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import swaggerUi from "swagger-ui-express";
+import jwt from "jsonwebtoken";
 import routes from "./routes/index.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import notFoundMiddleware from "./middlewares/notfound.middleware.js";
@@ -122,6 +123,26 @@ app.get("/__headers", (req, res) => {
     "CORS-Origin-Config": config.corsOrigin,
   };
   res.json(headers);
+});
+
+/**
+ * Global token interception middleware
+ * Checks for a valid Bearer token on every request, verifying and attaching it to res.locals.accessToken
+ * to ensure that authenticated requests receive the token in all success/failure responses.
+ */
+app.use((req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    try {
+      const decoded = jwt.verify(token, config.jwt.accessSecret);
+      req.user = decoded;
+      res.locals.accessToken = token;
+    } catch (err) {
+      // Proceed without failing so that public endpoints remain accessible
+    }
+  }
+  next();
 });
 
 /**

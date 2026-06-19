@@ -3,14 +3,12 @@ import { toAbsoluteUrl } from '../utils/url.js';
 import config from '../config/env.js';
 import * as partnersService from '../services/partners.service.js';
 
-const BASE_URL = config.baseUrl || '';
-
 /**
  * Build media object from partner logoUrl. Omit if no logoUrl.
  */
 function buildPartnerMedia(logoUrl, name) {
   if (!logoUrl || typeof logoUrl !== 'string' || !logoUrl.trim()) return undefined;
-  const url = toAbsoluteUrl(logoUrl.trim(), BASE_URL);
+  const url = toAbsoluteUrl(logoUrl.trim());
   return {
     url,
     thumbUrl: url,
@@ -59,6 +57,10 @@ export async function getPartners(req, res) {
     const partners = await partnersService.getPartners();
     const list = partners.map((p) => {
       const out = { ...p };
+      
+      // Resolve logoUrl to absolute URL
+      out.logoUrl = toAbsoluteUrl(p.logoUrl);
+
       if (p.logoUrl && String(p.logoUrl).trim()) {
         out.media = buildPartnerMedia(p.logoUrl, p.name);
       }
