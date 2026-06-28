@@ -180,3 +180,66 @@ export async function getCourseBySlug(req, res) {
     return fail(res, 500, error.message || 'Failed to fetch course');
   }
 }
+
+/**
+ * Search active courses (public)
+ * Accepts a search term via query parameter "q" or "query".
+ * If empty/missing, returns an empty array.
+ * Performs a case-insensitive regex search on title, cardBody, description, and location.
+ */
+export async function searchCourses(req, res) {
+  try {
+    const q = req.query.q || req.query.query;
+
+    if (!q || !String(q).trim()) {
+      return ok(res, []);
+    }
+
+    const searchTerm = String(q).trim();
+    const searchRegex = new RegExp(searchTerm, 'i');
+
+    const query = {
+      isActive: true,
+      $or: [
+        { title: searchRegex },
+        { cardBody: searchRegex },
+        { description: searchRegex },
+        { location: searchRegex }
+      ]
+    };
+
+    const courses = await Course.find(query)
+      .sort({ sortOrder: 1, createdAt: -1 })
+      .select(
+        'title slug cardBody imageUrl isAvailable availableDates sessionTime location price'
+      )
+      .lean();
+
+    const canRegister = (c) => c.isAvailable === true && c.isActive === true;
+
+    const list = courses.map((c) => {
+      const isAvailable = c.isAvailable === true;
+      const canReg = canRegister(c);
+      const out = { ...c };
+      
+      // Resolve direct image URL to absolute URL
+      out.imageUrl = toAbsoluteUrl(c.imageUrl);
+
+      out.price = c.price ?? 0;
+      out.pricing = buildPricing(c.price);
+      out.shortDescription = buildShortDescription(c.description, c.cardBody);
+      out.availabilityStatus = getAvailabilityStatus(c.isAvailable);
+      out.canRegister = canReg;
+      if (c.imageUrl && c.imageUrl.trim()) {
+        out.media = buildMedia(c.imageUrl, c.title);
+      }
+      out.actions = buildActions(c.slug, canReg);
+      return out;
+    });
+
+    return ok(res, list);
+  } catch (error) {
+    return fail(res, 500, error.message || 'Failed to search courses');
+  }
+}
+

@@ -327,6 +327,33 @@
           ]
         },
         {
+          "name": "Courses — Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Search active courses by a query string matching title, cardBody, description, or location.",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/courses/search?q=Nursing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "courses",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Nursing"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Partners — List",
           "request": {
             "method": "GET",
